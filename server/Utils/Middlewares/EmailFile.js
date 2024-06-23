@@ -24,7 +24,7 @@ export const SendFolderLink = async (options) => {
     subject: `info@alleviacare.com Shared you a Folder`,
     html: `<p>Hello,</p>
            <p>info@alleviacare.com Shared you a Folder. You can access it using the link below:</p>
-           <p><a href="https:// absfhc.com/folder/view/${options.folderId}">https:// absfhc.com/folder/view/${options.folderId}</a></p>
+           <p><a href="https://absfhc.com/folder/view/${options.folderId}">https://absfhc.com/folder/view/${options.folderId}</a></p>
            <p>Best regards,<br>Your Company Name</p>`,
   };
   await transporter.sendMail(mailOptions);
