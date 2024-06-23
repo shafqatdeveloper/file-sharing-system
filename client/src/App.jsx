@@ -14,7 +14,11 @@ import AllFiles from "./Pages/AllFiles/AllFiles";
 import PdfViewer from "./Pages/AllFiles/PdfViewer";
 import ViewFolder from "./Pages/User/ViewFolder";
 import Signup from "./Pages/Account/Signup";
+import { pdfjs } from "react-pdf";
+
 function App() {
+  pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
   return (
     <>
       <Navbar />

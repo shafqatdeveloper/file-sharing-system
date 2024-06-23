@@ -1,15 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Document, Page } from "react-pdf";
-import { pdfjs } from "react-pdf";
 import "./pdf-worker";
 import axios from "axios";
 import { toast } from "react-toastify";
 import Loader from "./Loaders/Loader";
-
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/build/pdf.worker.min.mjs",
-  import.meta.url
-).toString();
 
 function Uploader({ id }) {
   const [selectedFile, setSelectedFile] = useState(null);
