@@ -50,7 +50,7 @@ export const convertToPdf = async (req, res) => {
     }
 
     // Remove the original file after processing
-    fs.unlinkSync(req.file.path);
+    // fs.unlinkSync(req.file.path);
 
     // Set the response headers
     res.setHeader("Content-Type", "application/pdf");
@@ -109,7 +109,7 @@ export const uploadFileByAdmin = async (req, res) => {
 
     // Delete Old File
     const deletePath = path.join(__dirname, "public", "uploads", filePath);
-    fs.unlinkSync(deletePath);
+    // fs.unlinkSync(deletePath);
     // console.log(deletePath);
     // Write the modified PDF to the new file path
     fs.writeFileSync(newFilePath, pdfBytes);
