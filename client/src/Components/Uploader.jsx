@@ -10,6 +10,7 @@ function Uploader({ id }) {
   const [fileUrl, setFileUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [width, setWidth] = useState(window.innerWidth * 0.9);
   console.log(id);
 
@@ -54,6 +55,7 @@ function Uploader({ id }) {
   };
 
   const handleFileUpload = async (e) => {
+    setUploadLoading(true);
     e.preventDefault();
     const formData = new FormData();
     formData.append("folderId", id);
@@ -63,7 +65,9 @@ function Uploader({ id }) {
       toast(response.data.message);
       setFileUrl(null);
       setSelectedFile(null);
+      setUploadLoading(false);
     } else {
+      setUploadLoading(false);
       toast(response.data.message);
     }
   };
@@ -80,16 +84,33 @@ function Uploader({ id }) {
         onChange={handleFileChange}
         className="mb-4"
       />
-      <button
-        onClick={handleFileUpload}
-        className="px-5 py-1 bg-green-500 rounded-md"
-      >
-        Upload
-      </button>
-      {loading && <Loader />}
+      {uploadLoading ? (
+        <div className="flex flex-col mt-10 gap-4">
+          <h1 className="textxl font-bold font-sans">Uploading PDF</h1>
+          <Loader />
+        </div>
+      ) : (
+        <button
+          onClick={handleFileUpload}
+          className="px-5 py-1 bg-green-500 rounded-md"
+        >
+          Upload
+        </button>
+      )}
+      {loading && (
+        <div className="flex flex-col mt-10 gap-4">
+          <h1 className="textxl font-bold font-sans">Converting to PDF</h1>
+          <Loader />
+        </div>
+      )}
       {fileUrl && (
         <Document
-          loading={<Loader />}
+          loading={
+            <div className="flex flex-col mt-10 gap-4">
+              <h1 className="textxl font-bold font-sans">Loading PDF</h1>
+              <Loader />
+            </div>
+          }
           file={fileUrl}
           onLoadSuccess={onDocumentLoadSuccess}
         >

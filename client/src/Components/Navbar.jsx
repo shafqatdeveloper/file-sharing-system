@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FaSignInAlt, FaSignOutAlt, FaUserAlt } from "react-icons/fa";
+import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 const Navbar = () => {
@@ -39,11 +39,11 @@ const Navbar = () => {
   };
 
   return (
-    <header className="bg-white shadow-md py-4 px-6 flex justify-between items-center">
+    <header className="bg-white mb-1 shadow-md py-4 px-6 flex justify-between items-center">
       <div className="flex items-center">
         {/* <img src={logo} alt="Logo" className="h-10 w-10 mr-3" /> */}
-        <Link to={"/"}>
-          <FaUserAlt />
+        <Link to={"/"} className="text-2xl font-bold font-sans">
+          Logo
         </Link>
       </div>
       {/* <h1 className="text-xl font-bold">

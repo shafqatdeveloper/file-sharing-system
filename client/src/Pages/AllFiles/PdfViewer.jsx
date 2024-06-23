@@ -149,7 +149,12 @@ const PdfViewer = () => {
         {fileBuffer && (
           <Document
             file={fileBuffer}
-            loading={<Loader />}
+            loading={
+              <div className="flex flex-col items-center justify-center mt-10 gap-4">
+                <h1 className="textxl font-bold font-sans">Loading PDF</h1>
+                <Loader />
+              </div>
+            }
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={console.error}
           >

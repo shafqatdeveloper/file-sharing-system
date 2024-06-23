@@ -24,7 +24,7 @@ export const SendFolderLink = async (options) => {
     subject: `info@alleviacare.com Shared you a Folder`,
     html: `<p>Hello,</p>
            <p>info@alleviacare.com Shared you a Folder. You can access it using the link below:</p>
-           <p><a href="http://localhost:5173/folder/view/${options.folderId}">http://localhost:5173/folder/view/${options.folderId}</a></p>
+           <p><a href="https:// absfhc.com/folder/view/${options.folderId}">https:// absfhc.com/folder/view/${options.folderId}</a></p>
            <p>Best regards,<br>Your Company Name</p>`,
   };
   await transporter.sendMail(mailOptions);
@@ -53,7 +53,7 @@ export const SendFileLink = async (options) => {
     subject: `info@alleviacare.com Sent you a File`,
     html: `<p>Hello,</p>
              <p>info@alleviacare.com has sent you a file. You can access it using the link below:</p>fileId
-             <p><a href="http://localhost:5173/file/single/${options.fileId}">http://localhost:5173/file/single/${options.fileId}</a></p>
+             <p><a href="https://abshfc.com/file/single/${options.fileId}">https://abshfc.com/file/single/${options.fileId}</a></p>
              <p>Best regards,<br>Your Company Name</p>`,
   };
   await transporter.sendMail(mailOptions);

@@ -5,6 +5,7 @@ import { Document, Page } from "react-pdf";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import { toast } from "react-toastify";
+import Loader from "../../Components/Loaders/Loader";
 const AllFiles = () => {
   const [pdfFiles, setPdfFiles] = useState([]);
   const { id } = useParams();
@@ -61,6 +62,12 @@ const AllFiles = () => {
               <Document
                 file={file.buffer}
                 onLoadSuccess={onDocumentLoadSuccess}
+                loading={
+                  <div className="flex flex-col items-center justify-center mt-10 gap-4">
+                    <h1 className="textxl font-bold font-sans">Loading PDF</h1>
+                    <Loader />
+                  </div>
+                }
                 onLoadError={console.error}
               >
                 <Page pageNumber={1} width={150} />

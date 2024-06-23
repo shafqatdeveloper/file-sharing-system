@@ -91,7 +91,7 @@ Router.put("/upload/sign", async (req, res) => {
         await file.save();
       }
       file.fileName = filePath;
-      // fs.unlinkSync(deletePath);
+      fs.unlinkSync(deletePath);
       await file.save();
       res.status(200).json({
         success: true,
