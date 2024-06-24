@@ -2,16 +2,18 @@ import axios from "axios";
 import React, { useState } from "react";
 import { FaUser, FaLock, FaFolderPlus } from "react-icons/fa";
 import { GrOrganization } from "react-icons/gr";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const AddFolder = () => {
+const UpdateFolder = () => {
   const [folderName, setFolderName] = useState("");
+  const { folderId } = useParams();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     try {
-      const response = await axios.post("/api/admin/folder/add", {
+      const response = await axios.put(`/api/admin/folder/update/${folderId}`, {
         folderName,
       });
       if (response.status === 200) {
@@ -36,7 +38,7 @@ const AddFolder = () => {
       <header className="bg-white shadow-md py-4 px-6 w-full flex justify-between items-center">
         <div className="flex items-center">
           <FaFolderPlus className="text-blue-500 text-4xl mr-3" />
-          <h1 className="text-xl font-bold">Add Folder</h1>
+          <h1 className="text-xl font-bold">Update Folder</h1>
         </div>
       </header>
       <main className="w-full max-w-lg mt-10 bg-white shadow-md rounded-lg p-6">
@@ -73,4 +75,4 @@ const AddFolder = () => {
   );
 };
 
-export default AddFolder;
+export default UpdateFolder;

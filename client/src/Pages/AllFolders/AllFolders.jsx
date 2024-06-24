@@ -8,23 +8,8 @@ import { toast } from "react-toastify";
 
 const AllFolders = () => {
   const [data, setData] = useState([]);
-  console.log(data);
 
   const apiUrl = import.meta.env.VITE_API_URL;
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get("/api/admin/folders/all");
-        setData(response.data.folders);
-        console.log(response.data.folders[0]);
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const handleShareFolder = async (folderId) => {
     const receiver = prompt("Enter Receiver Email address");
@@ -37,6 +22,49 @@ const AllFolders = () => {
       toast(response.data.message);
     }
   };
+
+  const deleteFolderHandler = async (e, folderId) => {
+    e.preventDefault();
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this folder?"
+    );
+    if (confirmDelete) {
+      try {
+        const response = await axios.delete(
+          `/api/admin/folder/delete/${folderId}`
+        );
+        if (response.status === 200) {
+          toast(response.data.message);
+          // Refetch the folders
+          fetchData();
+        } else {
+          toast(response.data.message);
+        }
+      } catch (error) {
+        if (error.response) {
+          toast(error.response.data.message || "An error occurred.");
+        } else if (error.request) {
+          toast("No response received from the server.");
+        } else {
+          toast("An error occurred while setting up the request.");
+        }
+      }
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("/api/admin/folders/all");
+      setData(response.data.folders);
+      console.log(response.data.folders[0]);
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -77,16 +105,22 @@ const AllFolders = () => {
             >
               <FaEye size={21} />
             </Link>
-            <button className="text-yellow-500 hover:text-yellow-700">
+            <Link
+              to={`/admin/folder/update/${row.original._id}`}
+              className="text-yellow-500 hover:text-yellow-700"
+            >
               <FaEdit size={21} />
-            </button>
+            </Link>
             <button className="text-yellow-500 hover:text-yellow-700">
               <FaShare
                 onClick={() => handleShareFolder(row.original._id)}
                 size={21}
               />
             </button>
-            <button className="text-red-500 hover:text-red-700">
+            <button
+              onClick={(e) => deleteFolderHandler(e, row.original._id)}
+              className="text-red-500 hover:text-red-700"
+            >
               <FaTrashAlt size={21} />
             </button>
           </div>

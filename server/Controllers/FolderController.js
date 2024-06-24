@@ -59,3 +59,50 @@ export const shareFolder = async (req, res) => {
     });
   }
 };
+
+export const updateFolder = async (req, res) => {
+  const { folderName } = req.body;
+  const { folderId } = req.params;
+  try {
+    const folderExists = await Folder.findOne({ folderName });
+    if (!folderExists) {
+      res.status(401).json({
+        success: false,
+        message: `Folder does not Exist with this Name`,
+      });
+    } else {
+      await Folder.findByIdAndUpdate(folderId, { folderName, admin: req.user });
+      res
+        .status(200)
+        .json({ success: true, message: "Folder Updated Successfully" });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const deleteFolder = async (req, res) => {
+  const { folderId } = req.params;
+  try {
+    const folderExists = await Folder.findById(folderId);
+    if (!folderExists) {
+      res.status(401).json({
+        success: false,
+        message: `Folder does not Exist`,
+      });
+    } else {
+      await Folder.findByIdAndDelete(folderId);
+      res
+        .status(200)
+        .json({ success: true, message: "Folder Deleted Successfully" });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};

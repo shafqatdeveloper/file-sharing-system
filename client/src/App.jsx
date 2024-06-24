@@ -18,6 +18,7 @@ import { pdfjs } from "react-pdf";
 import AddAdmin from "./Pages/Account/AddAdmin";
 import ChangePassword from "./Pages/Account/ChangePassword";
 import UpdateAdmin from "./Pages/Account/UpdateAdminInfo";
+import UpdateFolder from "./Pages/UpdateFolder/UpdateFolder";
 
 function App() {
   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -32,6 +33,14 @@ function App() {
       <Suspense fallback={<SuspenseLoader />}>
         <Routes>
           <Route path="/admin/folder/add" element={<AddFolder />} />
+        </Routes>
+      </Suspense>
+      <Suspense fallback={<SuspenseLoader />}>
+        <Routes>
+          <Route
+            path="/admin/folder/update/:folderId"
+            element={<UpdateFolder />}
+          />
         </Routes>
       </Suspense>
       <Suspense fallback={<SuspenseLoader />}>

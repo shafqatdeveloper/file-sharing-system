@@ -5,8 +5,10 @@ import {
 } from "../Utils/Middlewares/AuthMiddleware.js";
 import {
   createFolder,
+  deleteFolder,
   getAllFolders,
   shareFolder,
+  updateFolder,
 } from "../Controllers/FolderController.js";
 
 const Router = express.Router();
@@ -23,6 +25,20 @@ Router.post(
   isAuthenticatedUser,
   auhtorizeRoles("admin"),
   createFolder
+);
+
+Router.put(
+  "/admin/folder/update/:folderId",
+  isAuthenticatedUser,
+  auhtorizeRoles("admin"),
+  updateFolder
+);
+
+Router.delete(
+  "/admin/folder/delete/:folderId",
+  isAuthenticatedUser,
+  auhtorizeRoles("admin"),
+  deleteFolder
 );
 
 export default Router;
