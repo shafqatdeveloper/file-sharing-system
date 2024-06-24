@@ -85,7 +85,7 @@ export const shareFile = async (req, res) => {
     await SendFileLink(options);
     await res.status(200).json({
       success: true,
-      message: `Folder Link sent to ${receiver}`,
+      message: `File Link sent to ${receiver}`,
     });
   } catch (error) {
     res.status(501).json({

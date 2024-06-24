@@ -53,7 +53,7 @@ export const SendFileLink = async (options) => {
     subject: `info@alleviacare.com Sent you a File`,
     html: `<p>Hello,</p>
              <p>info@alleviacare.com has sent you a file. You can access it using the link below:</p>fileId
-             <p><a href="https://abshfc.com/file/single/${options.fileId}">https://abshfc.com/file/single/${options.fileId}</a></p>
+             <p><a href="https://absfhc.com/file/single/${options.fileId}">https://absfhc.com/file/single/${options.fileId}</a></p>
              <p>Best regards,<br>Your Company Name</p>`,
   };
   await transporter.sendMail(mailOptions);
