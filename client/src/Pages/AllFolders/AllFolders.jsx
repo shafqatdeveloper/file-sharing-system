@@ -10,20 +10,21 @@ const AllFolders = () => {
   const [data, setData] = useState([]);
   console.log(data);
 
+  const apiUrl = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
-    // Function to fetch data from API
     const fetchData = async () => {
       try {
         const response = await axios.get("/api/admin/folders/all");
-        // Assuming the API response structure matches the data structure needed
         setData(response.data.folders);
+        console.log(response.data.folders[0]);
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
     };
 
     fetchData();
-  }, []); // Empty dependency array means this effect runs once when the component mounts
+  }, []);
 
   const handleShareFolder = async (folderId) => {
     const receiver = prompt("Enter Receiver Email address");
@@ -44,16 +45,16 @@ const AllFolders = () => {
         accessor: "folderName",
       },
       {
-        Header: "Email",
-        accessor: "admin.email",
+        Header: "Admin",
+        accessor: "admin.name",
       },
       {
-        Header: "Profile Picture",
+        Header: "Profile",
         accessor: "admin.userProfilePic",
         Cell: ({ value }) => (
           <div className="flex items-center justify-center">
             <img
-              src={`http://localhost:3000/uploads/${value}`}
+              src={`${apiUrl}/uploads/${value}`}
               alt="Profile"
               className="h-10 w-10 rounded-full"
             />

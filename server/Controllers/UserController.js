@@ -131,32 +131,28 @@ export const logout = async (req, res) => {
   }
 };
 
-// Add User and Create a Folder
+// Add Admin
 
-export const AddUserAndFolder = async (req, res) => {
-  const { folderName, email, password } = req.body;
+export const addAdmin = async (req, res) => {
+  const { name, email, password } = req.body;
   const profilePic = req.file;
   try {
-    const userExist = await User.findOne({ email });
-    if (userExist) {
+    const adminExists = await User.findOne({ email });
+    if (adminExists) {
       res.status(401).json({
         success: false,
-        message: "User Already Exists",
+        message: "Admin Already Exists",
       });
     } else {
       const NewUser = await User.create({
-        name: folderName,
+        name,
         email,
         password,
-        userProfilePic: profilePic?.filename,
-      });
-      await Folder.create({
-        folderName,
-        admin: NewUser._id,
+        userProfilePic: profilePic.filename,
       });
       res.status(200).json({
         success: true,
-        message: "User Registered",
+        message: "Admin Added",
         NewUser,
       });
     }
@@ -164,6 +160,76 @@ export const AddUserAndFolder = async (req, res) => {
     res.status(501).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// Change Passwor Admin
+
+export const changePassword = async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+  try {
+    const loggedInAdmin = await User.findById(req.user);
+    if (!loggedInAdmin) {
+      res.status(401).json({
+        success: false,
+        message: `Not Authorized`,
+      });
+    } else {
+      const passwordMatched = await loggedInAdmin.comparePassword(oldPassword);
+      if (!passwordMatched) {
+        res.status(401).json({
+          success: false,
+          message: `Old Password not Matched`,
+        });
+      } else {
+        loggedInAdmin.password = newPassword;
+        await loggedInAdmin.save();
+        res.status(200).json({
+          success: true,
+          message: "Password Updated",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+// Update Admin Info
+
+export const updateAdminInfo = async (req, res) => {
+  const { name, email, password } = req.body;
+  const profilePic = req.file;
+  try {
+    const loggedInAdmin = await User.findById(req.user);
+    if (!loggedInAdmin) {
+      res.status(401).json({
+        success: false,
+        message: `Not Authorized`,
+      });
+    } else {
+      const passwordMatched = await loggedInAdmin.comparePassword(password);
+      if (!passwordMatched) {
+        res.status(401).json({
+          success: false,
+          message: `Password not Matched`,
+        });
+      } else {
+        await User.findByIdAndUpdate(req.user, { name, email, profilePic });
+        res.status(200).json({
+          success: true,
+          message: "Admin info Updated",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
     });
   }
 };

@@ -16,6 +16,29 @@ export const getAllFolders = async (req, res) => {
   }
 };
 
+export const createFolder = async (req, res) => {
+  const { folderName } = req.body;
+  try {
+    const folderExists = await Folder.findOne({ folderName });
+    if (folderExists) {
+      res.status(401).json({
+        success: false,
+        message: `Folder already Exists with this Name`,
+      });
+    } else {
+      await Folder.create({ folderName, admin: req.user });
+      res
+        .status(200)
+        .json({ success: true, message: "Folder Created Successfully" });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
 export const shareFolder = async (req, res) => {
   try {
     const { folderId } = req.params;

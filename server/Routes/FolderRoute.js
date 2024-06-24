@@ -3,7 +3,11 @@ import {
   auhtorizeRoles,
   isAuthenticatedUser,
 } from "../Utils/Middlewares/AuthMiddleware.js";
-import { getAllFolders, shareFolder } from "../Controllers/FolderController.js";
+import {
+  createFolder,
+  getAllFolders,
+  shareFolder,
+} from "../Controllers/FolderController.js";
 
 const Router = express.Router();
 
@@ -14,5 +18,11 @@ Router.get(
   getAllFolders
 );
 Router.post("/folder/share/:folderId", shareFolder);
+Router.post(
+  "/admin/folder/add",
+  isAuthenticatedUser,
+  auhtorizeRoles("admin"),
+  createFolder
+);
 
 export default Router;
