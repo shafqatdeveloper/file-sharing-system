@@ -9,7 +9,11 @@ import NotFound from "./Pages/NotFound/404";
 import TopLoadingBar from "./Components/Loaders/TopLoadingBar";
 
 const Home = lazy(() => import("../src/Pages/Home/Home"));
-const Pricing = lazy(() => import("../src/Pages/Pricing/Pricing"));
+const Login = lazy(() => import("../src/Pages/Account/Login/Login"));
+const Signup = lazy(() => import("../src/Pages/Account/Signup/Signup"));
+const DevelopmentPage = lazy(() =>
+  import("../src/Pages/Development/PageUnderDev")
+);
 
 function App() {
   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -22,7 +26,12 @@ function App() {
       <Suspense fallback={<SuspenseLoader />}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/pricing" element={<DevelopmentPage />} />
+          <Route path="/team" element={<DevelopmentPage />} />
+          <Route path="/resources" element={<DevelopmentPage />} />
+          <Route path="/contact/sales" element={<DevelopmentPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

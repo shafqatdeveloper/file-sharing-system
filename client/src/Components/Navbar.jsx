@@ -71,9 +71,12 @@ const Navbar = () => {
           </Link>
         ))}
       </div>
-      <div className="md:flex items-center hidden justify-center text-white font-semibold font-sans tracking-wide bg-primaryDark rounded-full px-3 py-2">
+      <Link
+        to={"/contact/sales"}
+        className="md:flex items-center hidden justify-center text-white font-semibold font-sans tracking-wide bg-primaryDark rounded-full px-3 py-2"
+      >
         <button>Contact Sales</button>
-      </div>
+      </Link>
       <div className="md:hidden">
         <button
           onClick={toggleMenu}
@@ -101,9 +104,13 @@ const Navbar = () => {
               {item.name}
             </Link>
           ))}
-          <div className="flex items-center w-48 justify-center text-white font-semibold font-sans tracking-wide bg-primaryDark rounded-md px-3 py-2">
+          <Link
+            to={"/contact/sales"}
+            onClick={toggleMenu}
+            className="flex items-center w-48 justify-center text-white font-semibold font-sans tracking-wide bg-primaryDark rounded-md px-3 py-2"
+          >
             <button>Contact Sales</button>
-          </div>
+          </Link>
         </div>
       </div>
     </header>
