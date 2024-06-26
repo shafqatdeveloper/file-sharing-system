@@ -1,5 +1,10 @@
 import Folder from "../Schemas/FolderSchema.js";
+import crypto from "crypto";
 import { SendFolderLink } from "../Utils/Middlewares/EmailFile.js";
+
+const generateRandomPassword = () => {
+  return crypto.randomBytes(4).toString("hex");
+};
 
 export const getAllFolders = async (req, res) => {
   try {
@@ -18,6 +23,7 @@ export const getAllFolders = async (req, res) => {
 
 export const createFolder = async (req, res) => {
   const { folderName } = req.body;
+  const password = generateRandomPassword();
   try {
     const folderExists = await Folder.findOne({ folderName });
     if (folderExists) {
@@ -26,7 +32,7 @@ export const createFolder = async (req, res) => {
         message: `Folder already Exists with this Name`,
       });
     } else {
-      await Folder.create({ folderName, admin: req.user });
+      await Folder.create({ folderName, admin: req.user, password });
       res
         .status(200)
         .json({ success: true, message: "Folder Created Successfully" });

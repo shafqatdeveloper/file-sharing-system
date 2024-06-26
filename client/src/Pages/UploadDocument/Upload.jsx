@@ -3,10 +3,10 @@ import { useParams } from "react-router-dom";
 import Uploader from "../../Components/Uploader";
 
 const Upload = () => {
-  const { id } = useParams();
+  const { folderId } = useParams();
   return (
     <>
-      <Uploader id={id} />
+      <Uploader folderId={folderId} />
     </>
   );
 };

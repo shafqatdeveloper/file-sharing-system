@@ -19,6 +19,10 @@ const folderSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  password: {
+    type: String,
+    required: true,
+  },
 });
 
 const Folder = mongoose.model("folder", folderSchema);

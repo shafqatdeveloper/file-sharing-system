@@ -4,9 +4,9 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import userRouter from "./Routes/UserRoute.js";
-import fileRouter from "./Routes/FileRoute.js";
 import { mongodbConnection } from "./Config/Connection.js";
 import folderRouter from "./Routes/FolderRoute.js";
+import fileRouter from "./Routes/FileRoute.js";
 
 const app = express();
 
@@ -27,8 +27,8 @@ app.use(cors());
 
 // API Routes
 app.use("/api", userRouter);
-app.use("/api", fileRouter);
 app.use("/api", folderRouter);
+app.use("/api", fileRouter);
 
 app.use(express.static("public"));
 // Listening App

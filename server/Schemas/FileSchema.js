@@ -4,6 +4,10 @@ const fileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  filePath: {
+    type: String,
+    required: true,
+  },
   folder: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "folder",
@@ -17,12 +21,7 @@ const fileSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  sellerESign: {
-    type: String,
-  },
-  buyerESign: {
-    type: String,
-  },
+  fields: [],
   uploadedOn: {
     type: Date,
     default: Date.now(),

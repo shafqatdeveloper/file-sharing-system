@@ -1,12 +1,19 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { useTable, usePagination } from "react-table";
-import { FaTrashAlt, FaEdit, FaEye, FaShare } from "react-icons/fa";
+import {
+  FaTrashAlt,
+  FaEdit,
+  FaEye,
+  FaShare,
+  FaCopy,
+  FaRegCopy,
+} from "react-icons/fa";
 import { HiOutlineDocumentArrowUp } from "react-icons/hi2";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const AllFolders = () => {
+const Folders = () => {
   const [data, setData] = useState([]);
 
   const apiUrl = import.meta.env.VITE_API_URL;
@@ -66,6 +73,12 @@ const AllFolders = () => {
     fetchData();
   }, []);
 
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      toast("Password copied to clipboard");
+    });
+  };
+
   const columns = useMemo(
     () => [
       {
@@ -90,11 +103,26 @@ const AllFolders = () => {
         ),
       },
       {
+        Header: "Password",
+        accessor: "password",
+        Cell: ({ value }) => (
+          <div className="flex items-center">
+            <span>{value}</span>
+            <button
+              onClick={() => copyToClipboard(value)}
+              className="ml-2 text-blue-500"
+            >
+              <FaRegCopy />
+            </button>
+          </div>
+        ),
+      },
+      {
         Header: "Actions",
         Cell: ({ row }) => (
           <div className="flex space-x-4">
             <Link
-              to={`/document/upload/${row.original._id}`}
+              to={`/admin/file/add/${row.original._id}`}
               className="text-green-500 hover:text-blue-700"
             >
               <HiOutlineDocumentArrowUp size={21} />
@@ -298,4 +326,4 @@ const AllFolders = () => {
   );
 };
 
-export default AllFolders;
+export default Folders;
