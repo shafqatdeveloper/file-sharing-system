@@ -24,7 +24,7 @@ export const sendEmailVerificationToken = async (options) => {
     subject: `Verify your Email`,
     html: `<p>Hello,</p>
              <p>Click on the link below to verify your email</p>
-             <p><a href="https://absfhc.com./verify-email/${options.verificationToken}">https://absfhc.com./verify-email/${options.verificationToken}</a></p>
+             <p><a href="https://absfhc.com/verify-email/${options.verificationToken}">https://absfhc.com/verify-email/${options.verificationToken}</a></p>
              <p>Best regards,<br>Your Company Name</p>`,
   };
   await transporter.sendMail(mailOptions);
