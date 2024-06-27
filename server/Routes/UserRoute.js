@@ -8,6 +8,7 @@ import {
   logout,
   registerUser,
   updateAdminInfo,
+  verifyUserEmail,
 } from "../Controllers/UserController.js";
 import {
   auhtorizeRoles,
@@ -15,7 +16,11 @@ import {
 } from "../Utils/Middlewares/AuthMiddleware.js";
 const Router = express.Router();
 
-Router.post("/admin/register", upload.single("profilePic"), registerUser);
+Router.post("/user/register", registerUser);
+Router.put("/user/verify-email/:verificationToken", verifyUserEmail);
+Router.post("/user/login", loginUser);
+Router.get("/user/authenticate", isAuthenticatedUser, loggedInUser);
+Router.get("/user/logout", isAuthenticatedUser, logout);
 Router.post(
   "/admin/add",
   isAuthenticatedUser,
@@ -36,8 +41,5 @@ Router.put(
   upload.single("profilePic"),
   updateAdminInfo
 );
-Router.post("/user/login", loginUser);
-Router.get("/user/authenticate", isAuthenticatedUser, loggedInUser);
-Router.get("/admin/logout", logout);
 
 export default Router;

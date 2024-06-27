@@ -1,9 +1,14 @@
 import Folder from "../Schemas/FolderSchema.js";
 import User from "../Schemas/UserSchema.js";
+import crypto from "crypto";
+import { sendEmailVerificationToken } from "../Utils/Middlewares/Verification.js";
 
+// Register a User
+const generateVerficationToken = () => {
+  return crypto.randomBytes(32).toString("hex");
+};
 export const registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
-  const profilePic = req.file;
+  const { email, password } = req.body;
   try {
     const userExist = await User.findOne({ email });
     if (userExist) {
@@ -12,13 +17,15 @@ export const registerUser = async (req, res) => {
         message: "User Already Exists",
       });
     } else {
+      const verificationToken = generateVerficationToken();
       const NewUser = await User.create({
-        name,
         email,
         password,
-        userProfilePic: profilePic.filename,
+        verificationToken,
       });
       const token = NewUser.JWTTOKEN();
+      const options = { email, verificationToken };
+      await sendEmailVerificationToken(options);
       res
         .status(200)
         .cookie("token", token, {
@@ -35,6 +42,33 @@ export const registerUser = async (req, res) => {
     res.status(501).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// Verify a User
+export const verifyUserEmail = async (req, res) => {
+  const { verificationToken } = req.params;
+  try {
+    const user = await User.findOne({ verificationToken });
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: `Verification token is expired or invalid`,
+      });
+    } else {
+      user.verifiedUser = true;
+      user.verificationToken = undefined;
+      await user.save();
+      res.status(200).json({
+        success: true,
+        message: "Email Verified Successfully",
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
     });
   }
 };
@@ -95,7 +129,7 @@ export const loggedInUser = async (req, res) => {
     if (!loggedInUser) {
       res.status(402).json({
         success: false,
-        message: "Admin not found",
+        message: "User not found",
       });
     } else {
       res.status(200).json({

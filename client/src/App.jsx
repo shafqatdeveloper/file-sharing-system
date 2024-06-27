@@ -7,12 +7,17 @@ import "react-toastify/dist/ReactToastify.css";
 import { pdfjs } from "react-pdf";
 import NotFound from "./Pages/NotFound/404";
 import TopLoadingBar from "./Components/Loaders/TopLoadingBar";
+import "../src/App.css";
 
 const Home = lazy(() => import("../src/Pages/Home/Home"));
 const Login = lazy(() => import("../src/Pages/Account/Login/Login"));
 const Signup = lazy(() => import("../src/Pages/Account/Signup/Signup"));
 const DevelopmentPage = lazy(() =>
   import("../src/Pages/Development/PageUnderDev")
+);
+const AuthHome = lazy(() => import("../src/Pages/AuthenticatedHome/AuthHome"));
+const VerifyUserEmail = lazy(() =>
+  import("../src/Pages/Account/VerifyEmail/VerifyEmail")
 );
 
 function App() {
@@ -22,7 +27,7 @@ function App() {
     <div className="bg-white">
       <Navbar />
       <TopLoadingBar />
-      <ToastContainer />
+      <ToastContainer theme="dark" />
       <Suspense fallback={<SuspenseLoader />}>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -32,6 +37,11 @@ function App() {
           <Route path="/team" element={<DevelopmentPage />} />
           <Route path="/resources" element={<DevelopmentPage />} />
           <Route path="/contact/sales" element={<DevelopmentPage />} />
+          <Route path="/home" element={<AuthHome />} />
+          <Route
+            path="/verify-email/:verificationToken"
+            element={<VerifyUserEmail />}
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

@@ -1,9 +1,4 @@
 .suspense-loader {
-    /* position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0; */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -29,7 +24,7 @@
   .jimu-primary-loading:before,
   .jimu-primary-loading:after,
   .jimu-primary-loading {
-    background: #3c2163;
+    background: #67C22A;
     -webkit-animation: loading-keys-app-loading 0.8s infinite ease-in-out;
     animation: loading-keys-app-loading 0.8s infinite ease-in-out;
     width: 13.6px;
@@ -52,13 +47,13 @@
     80%,
     100% {
       opacity: .75;
-      box-shadow: 0 0 #076fe5;
+      box-shadow: 0 0 #67C22A;
       height: 32px;
     }
   
     40% {
       opacity: 1;
-      box-shadow: 0 -8px #076fe5;
+      box-shadow: 0 -8px #67C22A;
       height: 40px;
     }
   }
@@ -69,13 +64,13 @@
     80%,
     100% {
       opacity: .75;
-      box-shadow: 0 0 #076fe5;
+      box-shadow: 0 0 #67C22A;
       height: 32px;
     }
   
     40% {
       opacity: 1;
-      box-shadow: 0 -8px #076fe5;
+      box-shadow: 0 -8px #67C22A;
       height: 40px;
     }
   }

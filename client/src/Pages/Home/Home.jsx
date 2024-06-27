@@ -1,39 +1,21 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import AdminHome from "../AdminHomepage/AdminHome";
-import HomePage from "../Homepage/Homepage";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAuth } from "../../Redux/Features/Auth/AuthSlice";
 
 const Home = () => {
   const navigate = useNavigate();
-  const [isAdminLoggedIn, setisAdminLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
 
-  // useEffect(() => {
-  //   const checkAuthentication = async () => {
-  //     try {
-  //       const response = await axios.get("/api/user/authenticate", {
-  //         withCredentials: true,
-  //       });
-  //       const user = response.data.loggedInUser;
-  //       if (user) {
-  //         if (user.role === "admin") {
-  //           setisAdminLoggedIn(true);
-  //         } else {
-  //           navigate("/");
-  //         }
-  //       } else {
-  //         navigate("/");
-  //       }
-  //     } catch (error) {
-  //       navigate("/");
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   checkAuthentication();
-  // }, [navigate]);
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home?user=authenticated");
+    }
+  }, [isAuthenticated, navigate]);
   return (
     <div className="bg-white h-[90vh] sm:h-[85vh] flex items-center justify-center">
       <div className="flex flex-col gap-5 items-center justify-center w-full sm:w-2/3 px-3">

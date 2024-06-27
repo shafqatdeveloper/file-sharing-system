@@ -1,8 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import logoImage from "../../../assets/logo.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import ButtonLoader from "../../../Components/Loaders/ButtonLoader";
+import { useDispatch, useSelector } from "react-redux";
+import { checkAuth } from "../../../Redux/Features/Auth/AuthSlice";
 
 const SignUp = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/home?user=authenticated");
+    }
+  }, [isAuthenticated, navigate]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios.post("/api/user/register", {
+        email,
+        password,
+      });
+      console.log(response.data);
+      if (response.data.success) {
+        navigate("/home?user=authenticated");
+        toast(response.data.message);
+      } else {
+        toast(response.data.message);
+      }
+    } catch (err) {
+      toast(
+        err.response?.data?.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-lg rounded-lg">
@@ -15,7 +58,7 @@ const SignUp = () => {
             Sign up for <strong>Archi Esgin</strong> to continue.
           </p>
         </div>
-        <form className="mt-8 space-y-6">
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm">
             <div className="mb-4">
               <label htmlFor="email-address" className="sr-only">
@@ -25,6 +68,8 @@ const SignUp = () => {
                 id="email-address"
                 name="email"
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="appearance-none rounded-md relative block w-full px-3 py-2 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
                 placeholder="Email address"
@@ -39,19 +84,25 @@ const SignUp = () => {
                 name="password"
                 type="password"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded-md relative block w-full p-3 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
                 placeholder="Create your password"
               />
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center p-3 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark focus:outline-none "
-            >
-              Continue
-            </button>
+          <div className="w-full border border-primaryDark rounded-md flex justify-center  items-center h-12 font-medium">
+            {loading ? (
+              <ButtonLoader />
+            ) : (
+              <button
+                type="submit"
+                className="group relative w-full border border-transparent h-full text-sm font-medium rounded-md text-white bg-primaryDark focus:outline-none"
+              >
+                Continue
+              </button>
+            )}
           </div>
         </form>
         <div className="mt-6 text-center">

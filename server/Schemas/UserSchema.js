@@ -2,25 +2,24 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+  firstName: { type: String, required: false },
+  lastName: { type: String, required: false },
+  userRole: { type: String, required: false },
+  email: { type: String, required: true, unique: true },
+  fax: { type: String, required: false },
+  phoneNumber: { type: String, required: false },
+  esignName: { type: String, required: false },
+  esignInitials: { type: String, required: false },
+  companyName: { type: String, required: false },
+  jobTitle: { type: String, required: false },
+  tagline: { type: String, required: false },
+  photo: { type: String, required: false },
+  password: { type: String, required: true },
+  verificationToken: { type: String },
+  verifiedUser: {
+    type: Boolean,
+    default: false,
   },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  role: {
-    type: String,
-    default: "admin",
-  },
-  resetPasswordPin: String,
-  userProfilePic: String,
 });
 
 // Hashing Password
@@ -52,5 +51,5 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-const User = mongoose.model("user", userSchema);
+const User = mongoose.model("User", userSchema);
 export default User;
