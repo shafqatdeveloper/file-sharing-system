@@ -13,7 +13,7 @@ const Home = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/home?user=authenticated");
+      navigate("/folders?user=authenticated");
     }
   }, [isAuthenticated, navigate]);
   return (

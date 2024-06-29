@@ -20,7 +20,7 @@ const SignUp = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/home?user=authenticated");
+      navigate("/folders?user=authenticated");
     }
   }, [isAuthenticated, navigate]);
   const handleSubmit = async (e) => {
@@ -33,7 +33,7 @@ const SignUp = () => {
       });
       console.log(response.data);
       if (response.data.success) {
-        navigate("/home?user=authenticated");
+        navigate("/folders?user=authenticated");
         toast(response.data.message);
       } else {
         toast(response.data.message);

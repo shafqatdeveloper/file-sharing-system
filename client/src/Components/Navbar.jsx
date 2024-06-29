@@ -10,8 +10,10 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
-  const { isAuthenticated } = useSelector((state) => state.auth);
-  console.log("Auth", isAuthenticated);
+  useEffect(() => {
+    dispatch(checkAuth());
+  }, [dispatch]);
+
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
@@ -28,12 +30,11 @@ const Navbar = () => {
           theme: "dark",
         });
         setIsOpen(!isOpen);
+        dispatch(checkAuth());
+        setLoggedIn(false);
       }
     }
   };
-  useEffect(() => {
-    dispatch(checkAuth());
-  }, [dispatch, navigate]);
 
   const navItems = [
     { name: "home", navLink: "/" },
@@ -55,21 +56,11 @@ const Navbar = () => {
           <Link
             key={item.name}
             to={item.navLink}
-            className={`text-gray-700 hover:text-gray-900 ${
-              isAuthenticated && item.name === "login" && "hidden"
-            } font-medium`}
+            className="text-gray-700 hover:text-gray-900 font-medium"
           >
             {item.name}
           </Link>
         ))}
-        {isAuthenticated && (
-          <div
-            onClick={handleLogout}
-            className="flex items-center w-20 justify-center text-white font-semibold font-sans tracking-wide bg-red-600 rounded-md px-3 py-2.5"
-          >
-            <button>Logout</button>
-          </div>
-        )}
       </div>
       <Link
         to={"/contact/sales"}
@@ -97,9 +88,7 @@ const Navbar = () => {
             <Link
               key={item.name}
               to={item.navLink}
-              className={`text-gray-700 ${
-                isAuthenticated && item.name === "login" && "hidden"
-              } hover:text-gray-900 font-medium`}
+              className="text-gray-700 hover:text-gray-900 font-medium"
               onClick={toggleMenu}
             >
               {item.name}
@@ -109,18 +98,10 @@ const Navbar = () => {
             <Link
               to={"/contact/sales"}
               onClick={toggleMenu}
-              className={`flex items-center w-full justify-center text-white font-semibold font-sans tracking-wide bg-primaryDark rounded-md px-3 py-2 `}
+              className="flex items-center w-full justify-center text-white font-semibold font-sans tracking-wide bg-primaryDark rounded-md px-3 py-2"
             >
               <button>Contact Sales</button>
             </Link>
-            {isAuthenticated && (
-              <div
-                onClick={handleLogout}
-                className="flex items-center w-full justify-center text-white font-semibold font-sans tracking-wide bg-red-600 rounded-md px-3 py-2.5"
-              >
-                <button>Logout</button>
-              </div>
-            )}
           </div>
         </div>
       </div>

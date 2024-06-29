@@ -24,7 +24,7 @@ const Login = () => {
       });
       console.log(response.data);
       if (response.data.success) {
-        navigate("/home?user=authenticated");
+        navigate("/folders?user=authenticated");
         toast(response.data.message);
       } else {
         toast(response.data.message);
