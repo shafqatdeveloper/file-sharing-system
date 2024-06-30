@@ -158,7 +158,7 @@ const StepperPage = () => {
           }}
         >
           <Typography variant="h4" align="center" gutterBottom>
-            Add a new loop
+            Add a new Folder
           </Typography>
           <CustomStepper activeStep={activeStep} alternativeLabel>
             {steps.map((label) => (

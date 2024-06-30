@@ -1,4 +1,5 @@
 import Folder from "../Schemas/FolderSchema.js";
+
 export const createFolder = async (req, res) => {
   const { folderName } = req.body;
   const folderPic = req.file;
@@ -21,6 +22,21 @@ export const createFolder = async (req, res) => {
         createdFolder,
       });
     }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const getUserFolders = async (req, res) => {
+  try {
+    const folders = await Folder.find({ folderAdmin: req.user });
+    res.status(200).json({
+      success: true,
+      folders,
+    });
   } catch (error) {
     res.status(501).json({
       success: false,

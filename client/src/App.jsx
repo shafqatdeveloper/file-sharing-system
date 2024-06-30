@@ -23,6 +23,7 @@ const VerifyUserEmail = lazy(() =>
   import("../src/Pages/Account/VerifyEmail/VerifyEmail")
 );
 const AddFolder = lazy(() => import("../src/Pages/AddFolder/Steeper"));
+const SingleFolder = lazy(() => import("../src/Pages/Folder/SingleFolder"));
 
 function App() {
   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -50,6 +51,7 @@ function App() {
           <Route path="/resources" element={<DevelopmentPage />} />
           <Route path="/contact/sales" element={<DevelopmentPage />} />
           <Route path="/folders" element={<AuthHome />} />
+          <Route path="/folder/view/:folderId" element={<SingleFolder />} />
           <Route
             path="/verify-email/:verificationToken"
             element={<VerifyUserEmail />}

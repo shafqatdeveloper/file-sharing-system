@@ -19,6 +19,10 @@ const folderSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  folderType: {
+    type: String,
+    default: "None",
+  },
   folderPic: {
     type: String,
     required: true,
