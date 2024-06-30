@@ -14,7 +14,7 @@ const FinishFolderCreation = ({ folderData }) => (
           className="h-32"
         />
       </div>
-      {console.log(`${api_Url}/${folderData.folderPic}`)}
+      {console.log(`${api_Url}/uploads/${folderData.folderPic}`)}
       <div className="flex flex-col gap-1.5">
         <p className="">{folderData.folderName}</p>
         <p className=" text-gray-500">

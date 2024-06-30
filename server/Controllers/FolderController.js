@@ -13,7 +13,7 @@ export const createFolder = async (req, res) => {
       const createdFolder = await Folder.create({
         folderName,
         folderAdmin: req.user,
-        folderPic: folderPic.path,
+        folderPic: folderPic.filename,
       });
       res.status(200).json({
         success: true,
