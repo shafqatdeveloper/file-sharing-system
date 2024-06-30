@@ -11,6 +11,9 @@
   },
   "dependencies": {
     "@cyntler/react-doc-viewer": "^1.16.3",
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@mui/material": "^5.15.21",
     "@reduxjs/toolkit": "^2.2.5",
     "axios": "^1.7.2",
     "doc-viewer": "^0.0.10",

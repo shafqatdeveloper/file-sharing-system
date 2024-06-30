@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { checkAuth } from "../../Redux/Features/Auth/AuthSlice";
 import { CiFilter, CiSearch } from "react-icons/ci";
 import { BsSortDown } from "react-icons/bs";
 import { HiFolderAdd } from "react-icons/hi";
+import { toast } from "react-toastify";
 
 const AuthHome = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const AuthHome = () => {
           <div className="text-2xl font-bold">Default Profile</div>
           <div>
             <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full text-white bg-primaryDark">
-              + Add a Folder
+              <Link to={"/folder/add"}>+ Add a Folder</Link>
             </button>
           </div>
         </div>
@@ -66,7 +67,7 @@ const AuthHome = () => {
             </div>
             <div className="mt-6">
               <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark">
-                + Add a Folder
+                <Link to={"/folder/add"}>+ Add a Folder</Link>
               </button>
             </div>
           </div>

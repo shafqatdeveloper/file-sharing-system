@@ -7,7 +7,7 @@ const folderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  admin: {
+  folderAdmin: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
     required: true,
@@ -19,9 +19,13 @@ const folderSchema = new mongoose.Schema({
       required: true,
     },
   ],
-  password: {
+  folderPic: {
     type: String,
     required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 

@@ -44,3 +44,16 @@ export const auhtorizeRoles = (...roles) => {
     }
   };
 };
+
+export const authorizeVerifiedUser = () => {
+  return (req, res, next) => {
+    if (!req.user || !req.user.verifiedUser) {
+      res.status(403).json({
+        success: false,
+        message: "Access forbidden: User is not verified",
+      });
+    } else {
+      next();
+    }
+  };
+};
