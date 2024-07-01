@@ -40,7 +40,8 @@ export const getSingleFile = async (req, res) => {
   try {
     const { fileId } = req.params;
     const file = await FileUpload.findById(fileId);
-    const filePath = path.resolve(file.filePath);
+    const __dirname = path.resolve();
+    const filePath = path.join(__dirname, "public", "uploads", file.fileName);
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
