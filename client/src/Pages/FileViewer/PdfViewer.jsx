@@ -20,6 +20,7 @@ const FileViewer = () => {
       try {
         const response = await axios.get(`/api/file/single/${fileId}`, {
           responseType: "blob",
+          withCredentials: true,
         });
         const url = URL.createObjectURL(response.data);
         setPdfFile(url);

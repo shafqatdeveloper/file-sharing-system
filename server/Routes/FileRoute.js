@@ -20,7 +20,7 @@ Router.post(
   uploadFile
 );
 
-Router.get("/file/single/:fileId", isAuthenticatedUser, getSingleFile);
+Router.get("/file/single/:fileId", getSingleFile);
 Router.get(
   "/file/single/details/:fileId",
   isAuthenticatedUser,
