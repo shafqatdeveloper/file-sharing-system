@@ -12,10 +12,13 @@ export const uploadFile = async (req, res) => {
       });
     } else {
       const uploadingFile = req.file;
+      console.log(uploadingFile);
       const createdFile = await FileUpload.create({
         fileName: uploadingFile.filename,
+        Name: uploadingFile.originalname,
         filePath: uploadingFile.path,
         folder: folderId,
+        uplaodedBy: req.user,
       });
       folder.files.push(createdFile._id);
       await folder.save();

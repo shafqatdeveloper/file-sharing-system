@@ -4,6 +4,10 @@ const fileSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  Name: {
+    type: String,
+    required: true,
+  },
   filePath: {
     type: String,
     required: true,
@@ -13,11 +17,12 @@ const fileSchema = new mongoose.Schema({
     ref: "folder",
     required: true,
   },
-  sellerSigned: {
-    type: Boolean,
-    default: false,
+  uplaodedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+    required: true,
   },
-  buyerSigned: {
+  shared: {
     type: Boolean,
     default: false,
   },

@@ -48,7 +48,7 @@ export const getUserFolders = async (req, res) => {
 export const getSingleFolder = async (req, res) => {
   try {
     const { folderId } = req.params;
-    const folder = await Folder.findById(folderId);
+    const folder = await Folder.findById(folderId).populate("files");
     res.status(200).json({
       success: true,
       folder,

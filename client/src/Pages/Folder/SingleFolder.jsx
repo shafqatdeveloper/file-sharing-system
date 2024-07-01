@@ -5,15 +5,17 @@ import { checkAuth } from "../../Redux/Features/Auth/AuthSlice";
 import { toast } from "react-toastify";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import axios from "axios";
-import { GoPerson } from "react-icons/go";
-import { MdPersonOutline } from "react-icons/md";
+import { MdOutlinePersonOutline, MdPersonOutline } from "react-icons/md";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const SingleFolder = () => {
   const api_Url = import.meta.env.VITE_API_URL;
   const [folder, setFolder] = useState(null);
   const [documentUploader, setDocumentUploader] = useState(true);
   const [loggedInUserInfo, setLoggedInUserInfo] = useState(null);
-  console.log(loggedInUserInfo?.email);
+  const [uploadingFile, setUploadingFile] = useState(null);
+  const [fileUploadTrigger, setFileUploadTrigger] = useState(false);
+  console.log(folder?.files);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -29,6 +31,7 @@ const SingleFolder = () => {
   }, [isAuthenticated, navigate]);
   const { folderId } = useParams();
 
+  // Fetch LoggedIn User Folders
   useEffect(() => {
     const fetchSingleFolder = async () => {
       try {
@@ -42,9 +45,11 @@ const SingleFolder = () => {
       }
     };
     fetchSingleFolder();
-  }, []);
+  }, [fileUploadTrigger, folderId]);
+
+  // Fetch loggedIn User
   useEffect(() => {
-    const fetcUserInfo = async () => {
+    const fetchUserInfo = async () => {
       try {
         const response = await axios.get(`/api/user/authenticate`, {
           withCredentials: true,
@@ -57,15 +62,51 @@ const SingleFolder = () => {
         );
       }
     };
-    fetcUserInfo();
+    fetchUserInfo();
   }, []);
+
+  useEffect(() => {
+    if (uploadingFile) {
+      handleFileUpload();
+    }
+  }, [uploadingFile]);
+
+  const handleFileUpload = async (e) => {
+    const form = new FormData();
+    form.append("uploadingFile", uploadingFile);
+    if (e) e.preventDefault();
+    try {
+      const response = await axios.post(
+        `/api/user/document/upload/${folderId}`,
+        form,
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        toast(response.data.message);
+        setUploadingFile(null);
+        setFileUploadTrigger(!fileUploadTrigger);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setUploadingFile(file);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
         <div className="flex flex-col sm:flex-row gap-2 sm:gap-0 sm:justify-between sm:items-center mb-6">
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold">msr</h1>
+            <h1 className="text-2xl font-bold">{folder?.folderName}</h1>
             {folder && folder.folderType && (
               <div className="">
                 <select
@@ -129,29 +170,89 @@ const SingleFolder = () => {
               Add Document
             </button>
           </div>
-          {/* Add Document */}
-          <div
-            className={
-              documentUploader
-                ? "mt-6 w-full transition-all border-b-[1px] pb-8 duration-300"
-                : "opacity-0 hidden transition-all border-b-[1px] pb-8 duration-300"
-            }
-          >
-            <label
-              htmlFor="file-upload"
-              className="border border-primaryDark flex flex-col gap-1 items-center border-dashed bg-gray-100 py-14 rounded text-center cursor-pointer"
+          <div className="flex flex-col gap-3">
+            {/* Add Document */}
+            <div
+              className={
+                documentUploader
+                  ? "mt-6 w-full transition-all border-b-[1px] pb-8 duration-300"
+                  : "opacity-0 hidden transition-all border-b-[1px] pb-8 duration-300"
+              }
             >
-              <h3 className="text-primaryDark font-bold">BROWSE</h3>
-              <AiOutlineCloudUpload size={25} className="text-gray-500" />
-              <p>Search and add any PDF from your computer into this folder.</p>
-              <input
-                id="file-upload"
-                type="file"
-                accept="application/pdf"
-                className="hidden"
-              />
-            </label>
+              <label
+                htmlFor="file-upload"
+                className="border border-primaryDark flex flex-col gap-1 items-center border-dashed bg-gray-100 py-14 rounded text-center cursor-pointer"
+              >
+                <h3 className="text-primaryDark font-bold">BROWSE</h3>
+                <AiOutlineCloudUpload size={25} className="text-gray-500" />
+                <p>
+                  Search and add any PDF from your computer into this folder.
+                </p>
+                <input
+                  onChange={handleFileChange}
+                  id="file-upload"
+                  type="file"
+                  accept="application/pdf"
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <h1 className="mt-4 border-b-[1.5px] text-xl font-semibold font-sans border-b-primaryDark">
+              Uploaded File
+            </h1>
+            {folder && folder.files.length > 0 ? (
+              <div className="flex flex-col gap-3">
+                {folder.files.map((pdfFile, index) => {
+                  const fileName = pdfFile.Name.replace(/\.pdf$/, "");
+                  return (
+                    <div
+                      key={index}
+                      className="flex flex-col bg-[#e2fcdf]  rounded-md p-2 gap-1 md:flex-row md:justify-between"
+                    >
+                      <Link
+                        to={`/file/view/${pdfFile._id}`}
+                        className="font-bold font-sans text-sm"
+                      >
+                        {fileName}
+                      </Link>
+                      <div className="flex items-center gap-0 md:gap-5 justify-between md:justify-normal">
+                        <button className="text-primaryDark uppercase text-sm font-semibold">
+                          share
+                        </button>
+                        {pdfFile.shared ? (
+                          <span className="text-gray-400 font-semibold">
+                            Shared
+                          </span>
+                        ) : (
+                          <span className="text-gray-400 font-semibold">
+                            Not Shared
+                          </span>
+                        )}
+                        <button className="relative text-gray-400">
+                          <span>
+                            <MdOutlinePersonOutline size={25} />
+                          </span>
+                          <h1 className="absolute text-xs font-bold top-[-3px] right-[1px]">
+                            0
+                          </h1>
+                        </button>
+                        <button className="relative text-gray-400">
+                          <span>
+                            <BsThreeDotsVertical />
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <h1 className="text-center font-medium py-5">
+                No File Uploaded Yet!
+              </h1>
+            )}
           </div>
+
           {/* Add People */}
           <div className="my-5 flex flex-col gap-7">
             <div className="w-full flex sm:items-center sm:justify-between gap-2 sm:flex-row sm:gap-0 flex-col">
