@@ -42,7 +42,10 @@ export const getSingleFile = async (req, res) => {
     const file = await FileUpload.findById(fileId);
     const filePath = path.resolve(file.filePath);
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "inline");
+    res.setHeader(
+      "Content-Disposition",
+      'inline; filename="' + file.fileName + '"'
+    );
     res.status(200).sendFile(filePath);
   } catch (error) {
     res.status(501).json({
