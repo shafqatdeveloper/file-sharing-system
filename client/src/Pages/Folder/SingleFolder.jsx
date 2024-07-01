@@ -7,6 +7,7 @@ import { AiOutlineCloudUpload } from "react-icons/ai";
 import axios from "axios";
 import { MdOutlinePersonOutline, MdPersonOutline } from "react-icons/md";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import Loader from "../../Components/Loaders/Loader";
 
 const SingleFolder = () => {
   const api_Url = import.meta.env.VITE_API_URL;
@@ -14,6 +15,7 @@ const SingleFolder = () => {
   const [documentUploader, setDocumentUploader] = useState(true);
   const [loggedInUserInfo, setLoggedInUserInfo] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [fileUploadTrigger, setFileUploadTrigger] = useState(false);
   console.log(folder?.files);
   const navigate = useNavigate();
@@ -72,6 +74,7 @@ const SingleFolder = () => {
   }, [uploadingFile]);
 
   const handleFileUpload = async (e) => {
+    setUploadLoading(true);
     const form = new FormData();
     form.append("uploadingFile", uploadingFile);
     if (e) e.preventDefault();
@@ -93,6 +96,8 @@ const SingleFolder = () => {
         error.response?.data?.message ||
           "Something went wrong. Please try again."
       );
+    } finally {
+      setUploadLoading(false);
     }
   };
 
@@ -171,32 +176,38 @@ const SingleFolder = () => {
             </button>
           </div>
           <div className="flex flex-col gap-3">
-            {/* Add Document */}
-            <div
-              className={
-                documentUploader
-                  ? "mt-6 w-full transition-all border-b-[1px] pb-8 duration-300"
-                  : "opacity-0 hidden transition-all border-b-[1px] pb-8 duration-300"
-              }
-            >
-              <label
-                htmlFor="file-upload"
-                className="border border-primaryDark flex flex-col gap-1 items-center border-dashed bg-gray-100 py-14 rounded text-center cursor-pointer"
+            {uploadLoading ? (
+              <div className="flex flex-col gap-2 items-center justify-center">
+                <h1 className="text-lg font-bold font-sans">Uploading File</h1>
+                <Loader />
+              </div>
+            ) : (
+              <div
+                className={
+                  documentUploader
+                    ? "mt-6 w-full transition-all border-b-[1px] pb-8 duration-300"
+                    : "opacity-0 hidden transition-all border-b-[1px] pb-8 duration-300"
+                }
               >
-                <h3 className="text-primaryDark font-bold">BROWSE</h3>
-                <AiOutlineCloudUpload size={25} className="text-gray-500" />
-                <p>
-                  Search and add any PDF from your computer into this folder.
-                </p>
-                <input
-                  onChange={handleFileChange}
-                  id="file-upload"
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                />
-              </label>
-            </div>
+                <label
+                  htmlFor="file-upload"
+                  className="border border-primaryDark flex flex-col gap-1 items-center border-dashed bg-gray-100 py-14 rounded text-center cursor-pointer"
+                >
+                  <h3 className="text-primaryDark font-bold">BROWSE</h3>
+                  <AiOutlineCloudUpload size={25} className="text-gray-500" />
+                  <p>
+                    Search and add any PDF from your computer into this folder.
+                  </p>
+                  <input
+                    onChange={handleFileChange}
+                    id="file-upload"
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            )}
             <h1 className="mt-4 border-b-[1.5px] text-xl font-semibold font-sans border-b-primaryDark">
               Uploaded File
             </h1>

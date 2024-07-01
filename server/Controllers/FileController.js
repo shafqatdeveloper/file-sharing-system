@@ -24,7 +24,7 @@ export const uploadFile = async (req, res) => {
       await folder.save();
       res.status(200).json({
         success: true,
-        message: "File Uplaoded",
+        message: "File Uploaded",
       });
     }
   } catch (error) {
