@@ -1,5 +1,6 @@
 import FileUpload from "../Schemas/FileSchema.js";
 import Folder from "../Schemas/FolderSchema.js";
+import path from "path";
 
 export const uploadFile = async (req, res) => {
   try {
@@ -27,6 +28,36 @@ export const uploadFile = async (req, res) => {
         message: "File Uploaded",
       });
     }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const getSingleFile = async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const file = await FileUpload.findById(fileId);
+    const filePath = path.resolve(file.filePath);
+    res.status(200).sendFile(filePath);
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const getSingleFileDetails = async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const file = await FileUpload.findById(fileId);
+    res.status(200).json({
+      success: true,
+      file,
+    });
   } catch (error) {
     res.status(501).json({
       success: false,

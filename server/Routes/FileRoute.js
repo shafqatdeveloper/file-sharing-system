@@ -5,7 +5,11 @@ import {
   isAuthenticatedUser,
 } from "../Utils/Middlewares/AuthMiddleware.js";
 import upload from "../Config/Multer.js";
-import { uploadFile } from "../Controllers/FileController.js";
+import {
+  getSingleFile,
+  getSingleFileDetails,
+  uploadFile,
+} from "../Controllers/FileController.js";
 const Router = express.Router();
 
 Router.post(
@@ -14,6 +18,13 @@ Router.post(
   authorizeVerifiedUser(),
   upload.single("uploadingFile"),
   uploadFile
+);
+
+Router.get("/file/single/:fileId", isAuthenticatedUser, getSingleFile);
+Router.get(
+  "/file/single/details/:fileId",
+  isAuthenticatedUser,
+  getSingleFileDetails
 );
 
 export default Router;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkAuth } from "../../Redux/Features/Auth/AuthSlice";
 import { toast } from "react-toastify";
 import { AiOutlineCloudUpload } from "react-icons/ai";
@@ -21,6 +21,7 @@ const SingleFolder = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const location = useLocation();
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
@@ -222,6 +223,7 @@ const SingleFolder = () => {
                     >
                       <Link
                         to={`/file/view/${pdfFile._id}`}
+                        state={{ from: location.pathname }}
                         className="font-bold font-sans text-sm"
                       >
                         {fileName}

@@ -24,6 +24,7 @@ const VerifyUserEmail = lazy(() =>
 );
 const AddFolder = lazy(() => import("../src/Pages/AddFolder/Steeper"));
 const SingleFolder = lazy(() => import("../src/Pages/Folder/SingleFolder"));
+const ViewSingleFile = lazy(() => import("../src/Pages/FileViewer/PdfViewer"));
 
 function App() {
   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -52,6 +53,7 @@ function App() {
           <Route path="/contact/sales" element={<DevelopmentPage />} />
           <Route path="/folders" element={<AuthHome />} />
           <Route path="/folder/view/:folderId" element={<SingleFolder />} />
+          <Route path="/file/view/:fileId" element={<ViewSingleFile />} />
           <Route
             path="/verify-email/:verificationToken"
             element={<VerifyUserEmail />}
