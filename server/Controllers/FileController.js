@@ -41,6 +41,8 @@ export const getSingleFile = async (req, res) => {
     const { fileId } = req.params;
     const file = await FileUpload.findById(fileId);
     const filePath = path.resolve(file.filePath);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline");
     res.status(200).sendFile(filePath);
   } catch (error) {
     res.status(501).json({
