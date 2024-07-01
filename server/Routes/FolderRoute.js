@@ -6,6 +6,7 @@ import {
 } from "../Utils/Middlewares/AuthMiddleware.js";
 import {
   createFolder,
+  getSingleFolder,
   getUserFolders,
 } from "../Controllers/FolderController.js";
 import upload from "../Config/Multer.js";
@@ -20,4 +21,9 @@ Router.post(
   createFolder
 );
 Router.get("/user/folders", isAuthenticatedUser, getUserFolders);
+Router.get(
+  "/user/folder/single/:folderId",
+  isAuthenticatedUser,
+  getSingleFolder
+);
 export default Router;

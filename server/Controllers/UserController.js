@@ -7,6 +7,7 @@ import { sendEmailVerificationToken } from "../Utils/Middlewares/Verification.js
 const generateVerficationToken = () => {
   return crypto.randomBytes(32).toString("hex");
 };
+
 export const registerUser = async (req, res) => {
   const { email, password } = req.body;
   try {

@@ -44,3 +44,19 @@ export const getUserFolders = async (req, res) => {
     });
   }
 };
+
+export const getSingleFolder = async (req, res) => {
+  try {
+    const { folderId } = req.params;
+    const folder = await Folder.findById(folderId);
+    res.status(200).json({
+      success: true,
+      folder,
+    });
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error ${error.message}`,
+    });
+  }
+};
