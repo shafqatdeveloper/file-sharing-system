@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import PDFViewer from "../../Components/PdfViewer";
-import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import Draggable from "react-draggable";
-import { MdOutlineArrowLeft, MdOutlineKeyboardArrowLeft } from "react-icons/md";
+import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
+import { AiOutlineDelete } from "react-icons/ai";
+import { GrDrag } from "react-icons/gr";
 import SuspenseLoader from "../../Components/Loaders/SuspenseLoader";
 
 const FileViewer = () => {
@@ -14,10 +16,17 @@ const FileViewer = () => {
   const [addComponentDropdownOpened, setaddComponentDropdownOpened] =
     useState(false);
   const [fileDropdownOpened, setfileDropdownOpened] = useState(false);
+  const [selectedComponent, setSelectedComponent] = useState(null);
+  const touchTimeout = useRef(null);
+  const touchStartPosition = useRef({ x: 0, y: 0 });
+  const [loading, setLoading] = useState(true);
+  const [components, setComponents] = useState([]);
+  const [isDragging, setIsDragging] = useState(true); // Enable dragging initially
 
   // Fetch PDF File
   useEffect(() => {
     const fetchFile = async () => {
+      setLoading(true); // Set loading state to true before fetching
       try {
         const response = await axios.get(`/api/file/single/${fileId}`, {
           responseType: "blob",
@@ -25,8 +34,10 @@ const FileViewer = () => {
         });
         const url = URL.createObjectURL(response.data);
         setPdfFile(url);
+        setLoading(false); // Set loading state to false after fetching
       } catch (error) {
         console.error("Error fetching PDF file:", error);
+        setLoading(false); // Set loading state to false even if there is an error
       }
     };
 
@@ -45,14 +56,12 @@ const FileViewer = () => {
         const response = await axios.get(`/api/file/single/details/${fileId}`);
         setPdfFileDetails(response.data.file);
       } catch (error) {
-        console.error("Error fetching PDF file:", error);
+        console.error("Error fetching PDF file details:", error);
       }
     };
 
     fetchFileDetails();
   }, [fileId]);
-
-  const [components, setComponents] = useState([]);
 
   const handleAddOptionClick = (option) => {
     const newComponent = {
@@ -64,10 +73,54 @@ const FileViewer = () => {
   };
 
   const handleComponentDelete = (id) => {
-    const confirmDelete = confirm("Are You sure to delete this Component");
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this component?"
+    );
     if (confirmDelete) {
       setComponents(components.filter((comp) => comp.id !== id));
+      setSelectedComponent(null);
     }
+  };
+
+  const handleComponentClick = (id) => {
+    setSelectedComponent(id);
+  };
+
+  const handleTouchStart = (e, id) => {
+    touchStartPosition.current = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+    touchTimeout.current = setTimeout(() => {
+      setSelectedComponent(id);
+    }, 300); // Adjust the delay as necessary
+  };
+
+  const handleTouchMove = (e) => {
+    const touchMovePosition = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY,
+    };
+    const distance = Math.sqrt(
+      Math.pow(touchMovePosition.x - touchStartPosition.current.x, 2) +
+        Math.pow(touchMovePosition.y - touchStartPosition.current.y, 2)
+    );
+    if (distance > 10) {
+      // Adjust the threshold as necessary
+      clearTimeout(touchTimeout.current);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    clearTimeout(touchTimeout.current);
+  };
+
+  const handleInputFocus = () => {
+    setIsDragging(false);
+  };
+
+  const handleInputBlur = () => {
+    setIsDragging(true);
   };
 
   return (
@@ -173,21 +226,34 @@ const FileViewer = () => {
       <div className="flex-1 flex w-full justify-center items-center">
         <div className="relative w-full h-full">
           {components.map((comp) => (
-            <Draggable key={comp.id}>
+            <Draggable
+              key={comp.id}
+              handle=".drag-handle"
+              disabled={!isDragging}
+            >
               <div
-                onDoubleClick={() => handleComponentDelete(comp.id)}
-                className="absolute z-10"
+                onClick={() => handleComponentClick(comp.id)}
+                onTouchStart={(e) => handleTouchStart(e, comp.id)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                className="absolute z-10 flex items-center space-x-2"
+                style={{ position: "relative" }}
               >
+                <GrDrag className="drag-handle cursor-move" size={20} />
                 {comp.type === "date" && (
                   <input
                     type="date"
                     className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                   />
                 )}
                 {comp.type === "checkbox" && (
                   <input
                     type="checkbox"
                     className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                   />
                 )}
                 {comp.type === "fullName" && (
@@ -195,27 +261,43 @@ const FileViewer = () => {
                     type="text"
                     placeholder="Full Name"
                     className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                   />
                 )}
                 {comp.type === "text" && (
                   <input
                     type="text"
                     className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
+                    onFocus={handleInputFocus}
+                    onBlur={handleInputBlur}
                   />
                 )}
+                <AiOutlineDelete
+                  className="text-red-500 cursor-pointer"
+                  size={20}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleComponentDelete(comp.id);
+                  }}
+                  onTouchStart={(e) => {
+                    e.stopPropagation();
+                    handleComponentDelete(comp.id);
+                  }}
+                />
               </div>
             </Draggable>
           ))}
           <div className="w-full flex items-center justify-center">
-            {pdfFile ? (
-              <PDFViewer file={pdfFile} />
-            ) : (
+            {loading ? (
               <div className="flex items-center justify-center gap-20 flex-col">
                 <h1 className="text-xl font-bold font-sans">
                   Please Wait While PDF is being Loaded
                 </h1>
                 <SuspenseLoader />
               </div>
+            ) : (
+              pdfFile && <PDFViewer file={pdfFile} />
             )}
           </div>
         </div>
