@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import PDFViewer from "../../Components/PdfViewer";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Draggable from "react-draggable";
-import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import { AiOutlineCloseCircle } from "react-icons/ai";
+import { MdOutlineArrowLeft, MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import SuspenseLoader from "../../Components/Loaders/SuspenseLoader";
 
 const FileViewer = () => {
@@ -15,9 +14,6 @@ const FileViewer = () => {
   const [addComponentDropdownOpened, setaddComponentDropdownOpened] =
     useState(false);
   const [fileDropdownOpened, setfileDropdownOpened] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState(null);
-  const touchTimeout = useRef(null);
-  const touchStartPosition = useRef({ x: 0, y: 0 });
 
   // Fetch PDF File
   useEffect(() => {
@@ -49,7 +45,7 @@ const FileViewer = () => {
         const response = await axios.get(`/api/file/single/details/${fileId}`);
         setPdfFileDetails(response.data.file);
       } catch (error) {
-        console.error("Error fetching PDF file details:", error);
+        console.error("Error fetching PDF file:", error);
       }
     };
 
@@ -68,46 +64,10 @@ const FileViewer = () => {
   };
 
   const handleComponentDelete = (id) => {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this component?"
-    );
+    const confirmDelete = confirm("Are You sure to delete this Component");
     if (confirmDelete) {
       setComponents(components.filter((comp) => comp.id !== id));
-      setSelectedComponent(null); // Clear selected component if it is deleted
     }
-  };
-
-  const handleComponentClick = (id) => {
-    setSelectedComponent(id);
-  };
-
-  const handleTouchStart = (e, id) => {
-    touchStartPosition.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    };
-    touchTimeout.current = setTimeout(() => {
-      setSelectedComponent(id);
-    }, 300); // Adjust the delay as necessary
-  };
-
-  const handleTouchMove = (e) => {
-    const touchMovePosition = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    };
-    const distance = Math.sqrt(
-      Math.pow(touchMovePosition.x - touchStartPosition.current.x, 2) +
-        Math.pow(touchMovePosition.y - touchStartPosition.current.y, 2)
-    );
-    if (distance > 10) {
-      // Adjust the threshold as necessary
-      clearTimeout(touchTimeout.current);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    clearTimeout(touchTimeout.current);
   };
 
   return (
@@ -215,43 +175,32 @@ const FileViewer = () => {
           {components.map((comp) => (
             <Draggable key={comp.id}>
               <div
-                onClick={() => handleComponentClick(comp.id)}
-                onTouchStart={(e) => handleTouchStart(e, comp.id)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                className="absolute z-10 p-2 border-primaryDark border-2 rounded-md"
-                style={{ cursor: "pointer" }}
+                onDoubleClick={() => handleComponentDelete(comp.id)}
+                className="absolute z-10"
               >
-                {comp.id === selectedComponent && (
-                  <AiOutlineCloseCircle
-                    className="absolute top-0 right-[-20px] text-red-500"
-                    size={20}
-                    onClick={() => handleComponentDelete(comp.id)}
-                  />
-                )}
                 {comp.type === "date" && (
                   <input
                     type="date"
-                    className="border-none outline-none focus:outline-none"
+                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
                   />
                 )}
                 {comp.type === "checkbox" && (
                   <input
                     type="checkbox"
-                    className="border-none outline-none focus:outline-none"
+                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
                   />
                 )}
                 {comp.type === "fullName" && (
                   <input
                     type="text"
                     placeholder="Full Name"
-                    className="border-none outline-none focus:outline-none"
+                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
                   />
                 )}
                 {comp.type === "text" && (
                   <input
                     type="text"
-                    className="border-none outline-none focus:outline-none"
+                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
                   />
                 )}
               </div>
