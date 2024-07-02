@@ -4,6 +4,8 @@ import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Draggable from "react-draggable";
 import { MdOutlineArrowLeft, MdOutlineKeyboardArrowLeft } from "react-icons/md";
+import SuspenseLoader from "../../Components/Loaders/SuspenseLoader";
+import { AiOutlineCloseCircle } from "react-icons/ai";
 
 const FileViewer = () => {
   const { fileId } = useParams();
@@ -12,6 +14,7 @@ const FileViewer = () => {
   const location = useLocation();
   const [addComponentDropdownOpened, setaddComponentDropdownOpened] =
     useState(false);
+  const [selectedComponent, setSelectedComponent] = useState(null);
   const [fileDropdownOpened, setfileDropdownOpened] = useState(false);
 
   // Fetch PDF File
@@ -63,10 +66,17 @@ const FileViewer = () => {
   };
 
   const handleComponentDelete = (id) => {
-    const confirmDelete = confirm("Are You sure to delete this Component");
+    const confirmDelete = confirm(
+      "Are you sure you want to delete this component?"
+    );
     if (confirmDelete) {
       setComponents(components.filter((comp) => comp.id !== id));
+      setSelectedComponent(null); // Clear selected component if it is deleted
     }
+  };
+
+  const handleComponentClick = (id) => {
+    setSelectedComponent(id);
   };
 
   return (
@@ -174,9 +184,16 @@ const FileViewer = () => {
           {components.map((comp) => (
             <Draggable key={comp.id}>
               <div
-                onDoubleClick={() => handleComponentDelete(comp.id)}
+                onClick={() => handleComponentClick(comp.id)}
                 className="absolute z-10"
               >
+                {comp.id === selectedComponent && (
+                  <AiOutlineCloseCircle
+                    className="absolute top-0 right-[-20px] bg-red-500 text-white rounded-full"
+                    size={20}
+                    onClick={() => handleComponentDelete(comp.id)}
+                  />
+                )}
                 {comp.type === "date" && (
                   <input
                     type="date"
@@ -206,7 +223,16 @@ const FileViewer = () => {
             </Draggable>
           ))}
           <div className="w-full flex items-center justify-center">
-            <PDFViewer file={pdfFile} />
+            {pdfFile ? (
+              <PDFViewer file={pdfFile} />
+            ) : (
+              <div className="flex items-center justify-center gap-20 flex-col">
+                <h1 className="text-xl font-bold font-sans">
+                  Please Wait While PDF is being Loaded
+                </h1>
+                <SuspenseLoader />
+              </div>
+            )}
           </div>
         </div>
       </div>
