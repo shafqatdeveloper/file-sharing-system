@@ -13,15 +13,15 @@ const FileViewer = () => {
   const [pdfFile, setPdfFile] = useState(null);
   const [pdfFileDetails, setPdfFileDetails] = useState(null);
   const location = useLocation();
-  const [addComponentDropdownOpened, setaddComponentDropdownOpened] =
+  const [addComponentDropdownOpened, setAddComponentDropdownOpened] =
     useState(false);
-  const [fileDropdownOpened, setfileDropdownOpened] = useState(false);
+  const [fileDropdownOpened, setFileDropdownOpened] = useState(false);
   const [selectedComponent, setSelectedComponent] = useState(null);
   const touchTimeout = useRef(null);
   const touchStartPosition = useRef({ x: 0, y: 0 });
   const [loading, setLoading] = useState(true);
   const [components, setComponents] = useState([]);
-  const [isDragging, setIsDragging] = useState(true); // Enable dragging initially
+  const [isDragging, setIsDragging] = useState(true);
 
   // Fetch PDF File
   useEffect(() => {
@@ -34,10 +34,10 @@ const FileViewer = () => {
         });
         const url = URL.createObjectURL(response.data);
         setPdfFile(url);
-        setLoading(false); // Set loading state to false after fetching
       } catch (error) {
         console.error("Error fetching PDF file:", error);
-        setLoading(false); // Set loading state to false even if there is an error
+      } finally {
+        setLoading(false); // Set loading state to false after fetching
       }
     };
 
@@ -69,7 +69,7 @@ const FileViewer = () => {
       id: components.length,
     };
     setComponents([...components, newComponent]);
-    setaddComponentDropdownOpened(false);
+    setAddComponentDropdownOpened(false);
   };
 
   const handleComponentDelete = (id) => {
@@ -78,12 +78,7 @@ const FileViewer = () => {
     );
     if (confirmDelete) {
       setComponents(components.filter((comp) => comp.id !== id));
-      setSelectedComponent(null);
     }
-  };
-
-  const handleComponentClick = (id) => {
-    setSelectedComponent(id);
   };
 
   const handleTouchStart = (e, id) => {
@@ -91,9 +86,7 @@ const FileViewer = () => {
       x: e.touches[0].clientX,
       y: e.touches[0].clientY,
     };
-    touchTimeout.current = setTimeout(() => {
-      setSelectedComponent(id);
-    }, 300); // Adjust the delay as necessary
+    touchTimeout.current = setTimeout(() => {}, 300);
   };
 
   const handleTouchMove = (e) => {
@@ -152,7 +145,7 @@ const FileViewer = () => {
             <div className="relative inline-block text-left">
               <button
                 onClick={() =>
-                  setaddComponentDropdownOpened(!addComponentDropdownOpened)
+                  setAddComponentDropdownOpened(!addComponentDropdownOpened)
                 }
                 className="inline-flex justify-center w-24 rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700"
               >
@@ -191,7 +184,7 @@ const FileViewer = () => {
             </div>
             <div className="relative inline-block text-left">
               <button
-                onClick={() => setfileDropdownOpened(!fileDropdownOpened)}
+                onClick={() => setFileDropdownOpened(!fileDropdownOpened)}
                 className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700"
               >
                 File
@@ -232,7 +225,6 @@ const FileViewer = () => {
               disabled={!isDragging}
             >
               <div
-                onClick={() => handleComponentClick(comp.id)}
                 onTouchStart={(e) => handleTouchStart(e, comp.id)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
