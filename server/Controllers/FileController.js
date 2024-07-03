@@ -1,7 +1,7 @@
 import FileUpload from "../Schemas/FileSchema.js";
 import Folder from "../Schemas/FolderSchema.js";
 import path from "path";
-
+import fs from "fs";
 export const uploadFile = async (req, res) => {
   try {
     const { folderId } = req.params;
@@ -42,12 +42,28 @@ export const getSingleFile = async (req, res) => {
     const file = await FileUpload.findById(fileId);
     const __dirname = path.resolve();
     const filePath = path.join(__dirname, "public", "uploads", file.fileName);
+
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({
+        success: false,
+        message: "File not found",
+      });
+    }
+
+    // Set the content type and other headers
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      'inline; filename="' + file.fileName + '"'
-    );
-    res.status(200).sendFile(filePath);
+
+    // Stream the file to the response
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
+
+    fileStream.on("error", (error) => {
+      res.status(500).json({
+        success: false,
+        message: `Server Error: ${error.message}`,
+      });
+    });
   } catch (error) {
     res.status(501).json({
       success: false,
@@ -55,7 +71,6 @@ export const getSingleFile = async (req, res) => {
     });
   }
 };
-
 export const getSingleFileDetails = async (req, res) => {
   try {
     const { fileId } = req.params;
