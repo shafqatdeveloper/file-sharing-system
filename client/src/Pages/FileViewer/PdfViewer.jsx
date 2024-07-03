@@ -31,6 +31,7 @@ const FileViewer = () => {
         const response = await axios.get(`/api/file/single/${fileId}`, {
           responseType: "blob",
           withCredentials: true,
+          timeout: 0,
         });
         const url = URL.createObjectURL(response.data);
         setPdfFile(url);
@@ -67,6 +68,8 @@ const FileViewer = () => {
     const newComponent = {
       type: option,
       id: components.length,
+      x: 0,
+      y: 0,
     };
     setComponents([...components, newComponent]);
     setAddComponentDropdownOpened(false);
@@ -114,6 +117,27 @@ const FileViewer = () => {
 
   const handleInputBlur = () => {
     setIsDragging(true);
+  };
+
+  const handleStop = (e, data, id) => {
+    const updatedComponents = components.map((comp) => {
+      if (comp.id === id) {
+        return { ...comp, x: data.x, y: data.y };
+      }
+      return comp;
+    });
+    setComponents(updatedComponents);
+  };
+
+  const saveComponentsToBackend = async () => {
+    try {
+      await axios.post(`/api/file/components/${fileId}`, components, {
+        withCredentials: true,
+      });
+      alert("Components saved successfully!");
+    } catch (error) {
+      console.error("Error saving components:", error);
+    }
   };
 
   return (
@@ -192,7 +216,10 @@ const FileViewer = () => {
               {fileDropdownOpened && (
                 <div className="absolute z-20 left-0 md:right-0 top-12 mt-2 w-40 rounded-md shadow-lg bg-white text-black">
                   <div className="py-1">
-                    <button className="block px-4 py-2 text-sm text-gray-700">
+                    <button
+                      className="block px-4 py-2 text-sm text-gray-700"
+                      onClick={saveComponentsToBackend}
+                    >
                       Save
                     </button>
                     <button className="block px-4 py-2 text-sm text-gray-700">
@@ -207,7 +234,10 @@ const FileViewer = () => {
             </div>
           </div>
           <div className="flex space-x-4">
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <button
+              onClick={saveComponentsToBackend}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
               Save
             </button>
             <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
@@ -222,6 +252,8 @@ const FileViewer = () => {
             <Draggable
               key={comp.id}
               handle=".drag-handle"
+              position={{ x: comp.x, y: comp.y }}
+              onStop={(e, data) => handleStop(e, data, comp.id)}
               disabled={!isDragging}
             >
               <div
