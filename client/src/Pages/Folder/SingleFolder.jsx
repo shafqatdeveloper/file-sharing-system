@@ -8,6 +8,10 @@ import axios from "axios";
 import { MdOutlinePersonOutline, MdPersonOutline } from "react-icons/md";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Loader from "../../Components/Loaders/Loader";
+import Modal from "react-modal";
+import "./SingleFolder.css";
+
+Modal.setAppElement("#root");
 
 const SingleFolder = () => {
   const api_Url = import.meta.env.VITE_API_URL;
@@ -17,11 +21,37 @@ const SingleFolder = () => {
   const [uploadingFile, setUploadingFile] = useState(null);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [fileUploadTrigger, setFileUploadTrigger] = useState(false);
-  console.log(folder?.files);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
+  const [shareOptions, setShareOptions] = useState({
+    shareLink: false,
+    shareFile: true,
+    editable: false,
+  });
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  console.log(selectedFiles);
+
+  // Select a Single File
+  const handleSelectFile = (fileId) => {
+    setSelectedFiles((prevSelected) =>
+      prevSelected.includes(fileId)
+        ? prevSelected.filter((id) => id !== fileId)
+        : [...prevSelected, fileId]
+    );
+  };
+  // Select all FIles
+  const handleSelectAll = () => {
+    const allFileIds = folder.files.map((file) => file._id);
+    setSelectedFiles((prevSelected) =>
+      prevSelected.length === allFileIds.length ? [] : allFileIds
+    );
+  };
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const location = useLocation();
+
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
@@ -32,6 +62,7 @@ const SingleFolder = () => {
       toast.error("Please Login to access this page");
     }
   }, [isAuthenticated, navigate]);
+
   const { folderId } = useParams();
 
   // Fetch LoggedIn User Folders
@@ -74,6 +105,7 @@ const SingleFolder = () => {
     }
   }, [uploadingFile]);
 
+  // File Upload
   const handleFileUpload = async (e) => {
     setUploadLoading(true);
     const form = new FormData();
@@ -102,9 +134,46 @@ const SingleFolder = () => {
     }
   };
 
+  // File Change
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setUploadingFile(file);
+  };
+
+  // Open Share Modal
+  const openShareModal = () => {
+    setIsShareModalOpen(true);
+  };
+
+  // Close Share Modal
+  const closeShareModal = () => {
+    setIsShareModalOpen(false);
+    setShareEmail("");
+    setShareOptions({ shareLink: false, shareFile: true, editable: false });
+  };
+
+  // Handle Share
+  const handleFileShare = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`/api/file/share/multiple`, {
+        sharingFiles: selectedFiles,
+        email: shareEmail,
+        shareSetting: shareOptions,
+        folderId,
+      });
+      if (response.data.success) {
+        toast(response.data.message);
+        closeShareModal();
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
   };
 
   return (
@@ -212,58 +281,93 @@ const SingleFolder = () => {
             <h1 className="mt-4 border-b-[1.5px] text-xl font-semibold font-sans border-b-primaryDark">
               Uploaded File
             </h1>
-            {folder && folder.files.length > 0 ? (
-              <div className="flex flex-col gap-3">
-                {folder.files.map((pdfFile, index) => {
-                  const fileName = pdfFile.Name.replace(/\.pdf$/, "");
-                  return (
-                    <div
-                      key={index}
-                      className="flex flex-col bg-[#e2fcdf]  rounded-md p-2 gap-1 md:flex-row md:justify-between"
+            <div>
+              <div className="flex justify-end mb-3">
+                <div className="flex items-center gap-3">
+                  {selectedFiles.length > 0 && (
+                    <button
+                      onClick={() => openShareModal()}
+                      className="bg-primaryDark px-2 py-1 rounded-md text-white uppercase text-sm font-semibold"
                     >
-                      <Link
-                        to={`/file/view/${pdfFile._id}`}
-                        state={{ from: location.pathname }}
-                        className="font-bold font-sans text-sm"
-                      >
-                        {fileName}
-                      </Link>
-                      <div className="flex items-center gap-0 md:gap-5 justify-between md:justify-normal">
-                        <button className="text-primaryDark uppercase text-sm font-semibold">
-                          share
-                        </button>
-                        {pdfFile.shared ? (
-                          <span className="text-gray-400 font-semibold">
-                            Shared
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 font-semibold">
-                            Not Shared
-                          </span>
-                        )}
-                        <button className="relative text-gray-400">
-                          <span>
-                            <MdOutlinePersonOutline size={25} />
-                          </span>
-                          <h1 className="absolute text-xs font-bold top-[-3px] right-[1px]">
-                            0
-                          </h1>
-                        </button>
-                        <button className="relative text-gray-400">
-                          <span>
-                            <BsThreeDotsVertical />
-                          </span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                      Share
+                    </button>
+                  )}
+                  <button
+                    onClick={handleSelectAll}
+                    className="text-primaryDark uppercase text-sm font-semibold"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedFiles.length === folder?.files?.length
+                          ? true
+                          : false
+                      }
+                      className="self-start w-6 cursor-pointer h-6"
+                    />
+                  </button>
+                </div>
               </div>
-            ) : (
-              <h1 className="text-center font-medium py-5">
-                No File Uploaded Yet!
-              </h1>
-            )}
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {folder &&
+                  folder.files &&
+                  folder.files.length > 0 &&
+                  folder.files.map((pdfFile, index) => {
+                    const fileName = pdfFile.Name.replace(/\.pdf$/, "");
+                    const isSelected = selectedFiles.includes(pdfFile._id);
+                    return (
+                      <div
+                        key={index}
+                        className={`flex flex-col bg-[#e2fcdf]  rounded-md p-2 gap-1 border-2 ${
+                          isSelected
+                            ? "border-primaryDark"
+                            : "border-transparent"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleSelectFile(pdfFile._id)}
+                          className="self-start w-4 h-4"
+                        />
+                        <Link
+                          to={`/file/view/${pdfFile._id}`}
+                          state={{ from: location.pathname }}
+                          className="font-bold font-sans text-sm text-center py-1"
+                        >
+                          {fileName}
+                        </Link>
+                        <div className="flex items-center gap-2 justify-between mt-2">
+                          <button
+                            onClick={() => openShareModal(pdfFile._id)}
+                            className="bg-primaryDark px-1 py-0.5 rounded-md text-white uppercase text-sm font-semibold"
+                          >
+                            Share
+                          </button>
+                          {!pdfFile.shared && (
+                            <span className="text-gray-400 text-xs font-semibold">
+                              Not Shared
+                            </span>
+                          )}
+                          <button className="relative text-gray-400">
+                            <span>
+                              <MdOutlinePersonOutline size={23} />
+                            </span>
+                            <h1 className="absolute text-xs font-bold top-[-3px] right-[0px]">
+                              0
+                            </h1>
+                          </button>
+                          <button className="relative text-gray-400">
+                            <span>
+                              <BsThreeDotsVertical />
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
           </div>
 
           {/* Add People */}
@@ -336,6 +440,105 @@ const SingleFolder = () => {
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <Modal
+        isOpen={isShareModalOpen}
+        onRequestClose={closeShareModal}
+        contentLabel="Share File Modal"
+        className="Modal w-4/5 sm:h-3/4 rounded-md shadow-md shadow-black/30 flex flex-col h-max justify-center"
+        ariaHideApp={false}
+        overlayClassName="Overlay"
+      >
+        <h2 className="text-xl font-bold mb-4">Share File</h2>
+        <form onSubmit={handleFileShare}>
+          <div className="mb-4">
+            <label
+              htmlFor="shareEmail"
+              className="block mb-2 text-sm font-medium"
+            >
+              Recipient Email
+            </label>
+            <input
+              type="email"
+              id="shareEmail"
+              value={shareEmail}
+              onChange={(e) => setShareEmail(e.target.value)}
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block mb-2 text-sm font-medium">Options</label>
+            <div className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                id="shareLink"
+                checked={shareOptions.shareLink}
+                onChange={(e) =>
+                  setShareOptions({
+                    ...shareOptions,
+                    shareLink: e.target.checked,
+                  })
+                }
+                className="mr-2"
+              />
+              <label htmlFor="shareLink" className="text-sm">
+                Share Link Only
+              </label>
+            </div>
+            <div className="flex items-center mb-2">
+              <input
+                type="checkbox"
+                id="shareFile"
+                checked={shareOptions.shareFile}
+                onChange={(e) =>
+                  setShareOptions({
+                    ...shareOptions,
+                    shareFile: e.target.checked,
+                  })
+                }
+                className="mr-2"
+              />
+              <label htmlFor="shareFile" className="text-sm">
+                Share File
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="editable"
+                checked={shareOptions.editable}
+                onChange={(e) =>
+                  setShareOptions({
+                    ...shareOptions,
+                    editable: e.target.checked,
+                  })
+                }
+                className="mr-2"
+              />
+              <label htmlFor="editable" className="text-sm">
+                Editable
+              </label>
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={closeShareModal}
+              className="px-4 py-2 mr-2 border border-transparent text-sm font-medium rounded-md text-gray-600 bg-gray-200"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark"
+            >
+              Share
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };

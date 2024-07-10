@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  auhtorizeRoles,
   authorizeVerifiedUser,
   isAuthenticatedUser,
 } from "../Utils/Middlewares/AuthMiddleware.js";
@@ -8,6 +7,7 @@ import upload from "../Config/Multer.js";
 import {
   getSingleFile,
   getSingleFileDetails,
+  shareMultipleFiles,
   uploadFile,
 } from "../Controllers/FileController.js";
 const Router = express.Router();
@@ -25,6 +25,12 @@ Router.get(
   "/file/single/details/:fileId",
   isAuthenticatedUser,
   getSingleFileDetails
+);
+Router.post(
+  "/file/share/:fileId",
+  isAuthenticatedUser,
+  authorizeVerifiedUser(),
+  shareMultipleFiles
 );
 
 export default Router;

@@ -2,6 +2,9 @@ import FileUpload from "../Schemas/FileSchema.js";
 import Folder from "../Schemas/FolderSchema.js";
 import path from "path";
 import fs from "fs";
+import { EmailPDFFIle } from "../Utils/Middlewares/ShareFiles/EmailFile.js";
+import User from "../Schemas/UserSchema.js";
+
 export const uploadFile = async (req, res) => {
   try {
     const { folderId } = req.params;
@@ -81,6 +84,45 @@ export const getSingleFileDetails = async (req, res) => {
     });
   } catch (error) {
     res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const shareMultipleFiles = async (req, res) => {
+  try {
+    const { sharingFiles, folderId, shareSetting, email } = req.body; // Assume fileIds is an array of IDs received from the frontend
+    const files = await FileUpload.find({ _id: { $in: sharingFiles } });
+
+    if (!files.length) {
+      return res.status(404).json({
+        success: false,
+        message: "Files not Found",
+      });
+    }
+    const folder = await Folder.findById(folderId);
+    const fileLinks = files.map(
+      (file) => `${req.protocol}://${req.get("host")}/uploads/${file.fileName}`
+    );
+    const loggedInUser = await User.findById(req.user);
+    console.log(loggedInUser);
+    const options = {
+      email,
+      fileLinks,
+      sender: loggedInUser.name,
+      folderName: folder.folderName,
+      folderId,
+    };
+
+    await EmailPDFFIle(options);
+
+    res.status(200).json({
+      success: true,
+      message: "Files Sent Successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
       success: false,
       message: `Server Error: ${error.message}`,
     });

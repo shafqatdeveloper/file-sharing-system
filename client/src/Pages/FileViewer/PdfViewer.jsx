@@ -1,12 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import PDFViewer from "../../Components/PdfViewer";
 import { Link, useLocation, useParams } from "react-router-dom";
 import axios from "axios";
-import Draggable from "react-draggable";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
-import { AiOutlineDelete } from "react-icons/ai";
-import { GrDrag } from "react-icons/gr";
 import SuspenseLoader from "../../Components/Loaders/SuspenseLoader";
+import { Document, Page } from "react-pdf";
+import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
+import { useReactToPrint } from "react-to-print";
+import "react-pdf/dist/esm/Page/AnnotationLayer.css";
+import "react-pdf/dist/esm/Page/TextLayer.css";
 
 const FileViewer = () => {
   const { fileId } = useParams();
@@ -16,17 +17,37 @@ const FileViewer = () => {
   const [addComponentDropdownOpened, setAddComponentDropdownOpened] =
     useState(false);
   const [fileDropdownOpened, setFileDropdownOpened] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState(null);
-  const touchTimeout = useRef(null);
-  const touchStartPosition = useRef({ x: 0, y: 0 });
   const [loading, setLoading] = useState(true);
-  const [components, setComponents] = useState([]);
-  const [isDragging, setIsDragging] = useState(true);
+  const pdfViewerRef = useRef(null);
+  const printRef = useRef();
+  const [numPages, setNumPages] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageWidth, setPageWidth] = useState(800);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (pdfViewerRef.current) {
+        const viewerWidth = pdfViewerRef.current.clientWidth;
+        setPageWidth(viewerWidth * 0.75); // Set the width to 75% of the viewer width
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+  };
 
   // Fetch PDF File
   useEffect(() => {
     const fetchFile = async () => {
-      setLoading(true); // Set loading state to true before fetching
+      setLoading(true);
       try {
         const response = await axios.get(`/api/file/single/${fileId}`, {
           responseType: "blob",
@@ -38,7 +59,7 @@ const FileViewer = () => {
       } catch (error) {
         console.error("Error fetching PDF file:", error);
       } finally {
-        setLoading(false); // Set loading state to false after fetching
+        setLoading(false);
       }
     };
 
@@ -51,94 +72,31 @@ const FileViewer = () => {
   }, [fileId]);
 
   // Fetch Pdf File Details
-  useEffect(() => {
-    const fetchFileDetails = async () => {
-      try {
-        const response = await axios.get(`/api/file/single/details/${fileId}`);
-        setPdfFileDetails(response.data.file);
-      } catch (error) {
-        console.error("Error fetching PDF file details:", error);
-      }
-    };
+  const fetchFileDetails = async () => {
+    try {
+      const response = await axios.get(`/api/file/single/details/${fileId}`);
+      setPdfFileDetails(response.data.file);
+    } catch (error) {
+      console.error("Error fetching PDF file details:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchFileDetails();
   }, [fileId]);
 
-  const handleAddOptionClick = (option) => {
-    const newComponent = {
-      type: option,
-      id: components.length,
-      x: 0,
-      y: 0,
-    };
-    setComponents([...components, newComponent]);
-    setAddComponentDropdownOpened(false);
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = pdfFile;
+    link.download = pdfFileDetails?.Name || "document.pdf";
+    link.click();
   };
 
-  const handleComponentDelete = (id) => {
-    const confirmDelete = confirm(
-      "Are you sure you want to delete this component?"
-    );
-    if (confirmDelete) {
-      setComponents(components.filter((comp) => comp.id !== id));
-    }
-  };
-
-  const handleTouchStart = (e, id) => {
-    touchStartPosition.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    };
-    touchTimeout.current = setTimeout(() => {}, 300);
-  };
-
-  const handleTouchMove = (e) => {
-    const touchMovePosition = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    };
-    const distance = Math.sqrt(
-      Math.pow(touchMovePosition.x - touchStartPosition.current.x, 2) +
-        Math.pow(touchMovePosition.y - touchStartPosition.current.y, 2)
-    );
-    if (distance > 10) {
-      // Adjust the threshold as necessary
-      clearTimeout(touchTimeout.current);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    clearTimeout(touchTimeout.current);
-  };
-
-  const handleInputFocus = () => {
-    setIsDragging(false);
-  };
-
-  const handleInputBlur = () => {
-    setIsDragging(true);
-  };
-
-  const handleStop = (e, data, id) => {
-    const updatedComponents = components.map((comp) => {
-      if (comp.id === id) {
-        return { ...comp, x: data.x, y: data.y };
-      }
-      return comp;
-    });
-    setComponents(updatedComponents);
-  };
-
-  const saveComponentsToBackend = async () => {
-    try {
-      await axios.post(`/api/file/components/${fileId}`, components, {
-        withCredentials: true,
-      });
-      alert("Components saved successfully!");
-    } catch (error) {
-      console.error("Error saving components:", error);
-    }
-  };
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "",
+    pageStyle: () => "@page { size: auto; margin: 10mm; }",
+  });
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center gap-4 mt-5 px-1">
@@ -178,28 +136,16 @@ const FileViewer = () => {
               {addComponentDropdownOpened && (
                 <div className="absolute z-20 left-0 md:right-0 top-12 mt-2 w-56 rounded-md shadow-lg bg-white text-black">
                   <div className="py-1">
-                    <button
-                      className="cursor-pointer px-4 py-2 text-sm text-gray-700"
-                      onClick={() => handleAddOptionClick("date")}
-                    >
+                    <button className="cursor-pointer px-4 py-2 text-sm text-gray-700">
                       Date
                     </button>
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700"
-                      onClick={() => handleAddOptionClick("checkbox")}
-                    >
+                    <button className="block px-4 py-2 text-sm text-gray-700">
                       Checkbox
                     </button>
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700"
-                      onClick={() => handleAddOptionClick("fullName")}
-                    >
+                    <button className="block px-4 py-2 text-sm text-gray-700">
                       Full Name
                     </button>
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700"
-                      onClick={() => handleAddOptionClick("text")}
-                    >
+                    <button className="block px-4 py-2 text-sm text-gray-700">
                       Text
                     </button>
                   </div>
@@ -216,16 +162,19 @@ const FileViewer = () => {
               {fileDropdownOpened && (
                 <div className="absolute z-20 left-0 md:right-0 top-12 mt-2 w-40 rounded-md shadow-lg bg-white text-black">
                   <div className="py-1">
-                    <button
-                      className="block px-4 py-2 text-sm text-gray-700"
-                      onClick={saveComponentsToBackend}
-                    >
+                    <button className="block px-4 py-2 text-sm text-gray-700">
                       Save
                     </button>
-                    <button className="block px-4 py-2 text-sm text-gray-700">
+                    <button
+                      className="block px-4 py-2 text-sm text-gray-700"
+                      onClick={handleDownload}
+                    >
                       Download
                     </button>
-                    <button className="block px-4 py-2 text-sm text-gray-700">
+                    <button
+                      className="block px-4 py-2 text-sm text-gray-700"
+                      onClick={handlePrint}
+                    >
                       Print
                     </button>
                   </div>
@@ -234,10 +183,7 @@ const FileViewer = () => {
             </div>
           </div>
           <div className="flex space-x-4">
-            <button
-              onClick={saveComponentsToBackend}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               Save
             </button>
             <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
@@ -246,73 +192,10 @@ const FileViewer = () => {
           </div>
         </div>
       </div>
+
       <div className="flex-1 flex w-full justify-center items-center">
         <div className="relative w-full h-full">
-          {components.map((comp) => (
-            <Draggable
-              key={comp.id}
-              handle=".drag-handle"
-              position={{ x: comp.x, y: comp.y }}
-              onStop={(e, data) => handleStop(e, data, comp.id)}
-              disabled={!isDragging}
-            >
-              <div
-                onTouchStart={(e) => handleTouchStart(e, comp.id)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                className="absolute z-10 flex items-center space-x-2"
-                style={{ position: "relative" }}
-              >
-                <GrDrag className="drag-handle cursor-move" size={20} />
-                {comp.type === "date" && (
-                  <input
-                    type="date"
-                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                  />
-                )}
-                {comp.type === "checkbox" && (
-                  <input
-                    type="checkbox"
-                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                  />
-                )}
-                {comp.type === "fullName" && (
-                  <input
-                    type="text"
-                    placeholder="Full Name"
-                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                  />
-                )}
-                {comp.type === "text" && (
-                  <input
-                    type="text"
-                    className="border-2 rounded-md outline-none focus:outline-none p-2 border-primaryDark"
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                  />
-                )}
-                <AiOutlineDelete
-                  className="text-red-500 cursor-pointer"
-                  size={20}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleComponentDelete(comp.id);
-                  }}
-                  onTouchStart={(e) => {
-                    e.stopPropagation();
-                    handleComponentDelete(comp.id);
-                  }}
-                />
-              </div>
-            </Draggable>
-          ))}
-          <div className="w-full flex items-center justify-center">
+          <div className="w-full flex justify-center">
             {loading ? (
               <div className="flex items-center justify-center gap-20 flex-col">
                 <h1 className="text-xl font-bold font-sans">
@@ -321,7 +204,47 @@ const FileViewer = () => {
                 <SuspenseLoader />
               </div>
             ) : (
-              pdfFile && <PDFViewer file={pdfFile} />
+              pdfFile && (
+                <div className="flex flex-col items-center gap-5 w-full">
+                  <div
+                    ref={pdfViewerRef}
+                    className="w-full border-[1.5px] sm:w-4/5 md:w-3/4 border-primaryDark rounded-md"
+                  >
+                    <div ref={printRef}>
+                      <Document
+                        file={pdfFile}
+                        onLoadSuccess={onDocumentLoadSuccess}
+                        className="w-full"
+                      >
+                        {Array.from(new Array(numPages), (el, index) => (
+                          <div
+                            key={`page_${index + 1}`}
+                            className="my-2 flex justify-center"
+                          >
+                            <Page pageNumber={index + 1} width={pageWidth} />
+                          </div>
+                        ))}
+                      </Document>
+                    </div>
+                  </div>
+                  <div className="flex justify-center gap-5 py-5">
+                    <button
+                      className="p-2 rounded-full bg-gray-200"
+                      onClick={() => setPageNumber(pageNumber - 1)}
+                      disabled={pageNumber === 1}
+                    >
+                      <AiOutlineArrowLeft />
+                    </button>
+                    <button
+                      className="p-2 rounded-full bg-gray-200"
+                      onClick={() => setPageNumber(pageNumber + 1)}
+                      disabled={pageNumber === numPages}
+                    >
+                      <AiOutlineArrowRight />
+                    </button>
+                  </div>
+                </div>
+              )
             )}
           </div>
         </div>
