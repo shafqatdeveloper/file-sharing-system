@@ -8,6 +8,7 @@ import {
   getSingleFile,
   getSingleFileDetails,
   shareMultipleFiles,
+  shareSingleFile,
   uploadFile,
 } from "../Controllers/FileController.js";
 const Router = express.Router();
@@ -27,10 +28,16 @@ Router.get(
   getSingleFileDetails
 );
 Router.post(
-  "/file/share/:fileId",
+  "/file/share/multiple",
   isAuthenticatedUser,
   authorizeVerifiedUser(),
   shareMultipleFiles
+);
+Router.post(
+  "/file/share/single",
+  isAuthenticatedUser,
+  authorizeVerifiedUser(),
+  shareSingleFile
 );
 
 export default Router;

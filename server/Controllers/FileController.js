@@ -2,7 +2,10 @@ import FileUpload from "../Schemas/FileSchema.js";
 import Folder from "../Schemas/FolderSchema.js";
 import path from "path";
 import fs from "fs";
-import { EmailPDFFIle } from "../Utils/Middlewares/ShareFiles/EmailFile.js";
+import {
+  EmailMultiplePDFFIle,
+  EmailSinglePDFFIle,
+} from "../Utils/Middlewares/ShareFiles/EmailFile.js";
 import User from "../Schemas/UserSchema.js";
 
 export const uploadFile = async (req, res) => {
@@ -92,7 +95,7 @@ export const getSingleFileDetails = async (req, res) => {
 
 export const shareMultipleFiles = async (req, res) => {
   try {
-    const { sharingFiles, folderId, shareSetting, email } = req.body; // Assume fileIds is an array of IDs received from the frontend
+    const { sharingFiles, folderId, shareSetting, email } = req.body;
     const files = await FileUpload.find({ _id: { $in: sharingFiles } });
 
     if (!files.length) {
@@ -115,11 +118,51 @@ export const shareMultipleFiles = async (req, res) => {
       folderId,
     };
 
-    await EmailPDFFIle(options);
+    await EmailMultiplePDFFIle(options);
+    await FileUpload.updateMany(
+      { _id: { $in: sharingFiles } },
+      { $set: { shared: true } }
+    );
 
     res.status(200).json({
       success: true,
       message: "Files Sent Successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const shareSingleFile = async (req, res) => {
+  try {
+    const { sharingFile, folderId, shareSetting, email } = req.body;
+    const file = await FileUpload.findById(sharingFile);
+
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: "File not Found",
+      });
+    }
+    const folder = await Folder.findById(folderId);
+    const loggedInUser = await User.findById(req.user);
+    const options = {
+      email,
+      sender: loggedInUser.name,
+      folderName: folder.folderName,
+      fileId: sharingFile,
+      fileName: file.Name,
+      filePath: file.filePath,
+    };
+    await EmailSinglePDFFIle(options);
+    file.shared = true;
+    await file.save();
+    res.status(200).json({
+      success: true,
+      message: "File Sent Successfully",
     });
   } catch (error) {
     res.status(500).json({

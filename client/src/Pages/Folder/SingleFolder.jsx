@@ -29,8 +29,9 @@ const SingleFolder = () => {
     editable: false,
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
-  console.log(selectedFiles);
-
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shared, setShared] = useState(false);
+  const [selectedFileToShare, setSelectedFileToShare] = useState(null);
   // Select a Single File
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelected) =>
@@ -79,7 +80,10 @@ const SingleFolder = () => {
       }
     };
     fetchSingleFolder();
-  }, [fileUploadTrigger, folderId]);
+    if (shared) {
+      setShared(false);
+    }
+  }, [fileUploadTrigger, folderId, shared]);
 
   // Fetch loggedIn User
   useEffect(() => {
@@ -155,24 +159,54 @@ const SingleFolder = () => {
   // Handle Share
   const handleFileShare = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(`/api/file/share/multiple`, {
-        sharingFiles: selectedFiles,
-        email: shareEmail,
-        shareSetting: shareOptions,
-        folderId,
-      });
-      if (response.data.success) {
-        toast(response.data.message);
-        closeShareModal();
-      } else {
-        toast.error(response.data.message);
+    closeShareModal();
+    setShareLoading(true);
+    if (selectedFiles.length > 0) {
+      try {
+        const response = await axios.post(`/api/file/share/multiple`, {
+          sharingFiles: selectedFiles,
+          email: shareEmail,
+          shareSetting: shareOptions,
+          folderId,
+        });
+        if (response.data.success) {
+          toast(response.data.message);
+          setShared(true);
+          setSelectedFiles([]);
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Something went wrong. Please try again."
+        );
+      } finally {
+        setShareLoading(false);
       }
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
+    } else {
+      try {
+        const response = await axios.post(`/api/file/share/single`, {
+          sharingFile: selectedFileToShare,
+          email: shareEmail,
+          shareSetting: shareOptions,
+          folderId,
+        });
+        if (response.data.success) {
+          toast(response.data.message);
+          setShared(true);
+          setSelectedFileToShare(null);
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Something went wrong. Please try again."
+        );
+      } finally {
+        setShareLoading(false);
+      }
     }
   };
 
@@ -287,9 +321,14 @@ const SingleFolder = () => {
                   {selectedFiles.length > 0 && (
                     <button
                       onClick={() => openShareModal()}
-                      className="bg-primaryDark px-2 py-1 rounded-md text-white uppercase text-sm font-semibold"
+                      disabled={shareLoading ? true : false}
+                      className={`${
+                        shareLoading
+                          ? "bg-transparent border-2 border-primaryDark"
+                          : "bg-primaryDark text-white"
+                      }  w-20 h-10 rounded-md  uppercase text-sm font-semibold`}
                     >
-                      Share
+                      {shareLoading ? <Loader /> : "Share"}
                     </button>
                   )}
                   <button
@@ -303,7 +342,7 @@ const SingleFolder = () => {
                           ? true
                           : false
                       }
-                      className="self-start w-6 cursor-pointer h-6"
+                      className="self-start w-8 cursor-pointer h-8 rounded-md"
                     />
                   </button>
                 </div>
@@ -339,12 +378,28 @@ const SingleFolder = () => {
                         </Link>
                         <div className="flex items-center gap-2 justify-between mt-2">
                           <button
-                            onClick={() => openShareModal(pdfFile._id)}
-                            className="bg-primaryDark px-1 py-0.5 rounded-md text-white uppercase text-sm font-semibold"
+                            onClick={() => {
+                              openShareModal();
+                              setSelectedFileToShare(pdfFile._id);
+                            }}
+                            className={`${
+                              shareLoading
+                                ? "bg-transparent border-2 border-primaryDark"
+                                : "bg-primaryDark text-white"
+                            }  w-14 h-9 rounded-md  uppercase text-sm font-semibold`}
                           >
-                            Share
+                            {shareLoading &&
+                            pdfFile._id === selectedFileToShare ? (
+                              <Loader />
+                            ) : (
+                              "Share"
+                            )}
                           </button>
-                          {!pdfFile.shared && (
+                          {pdfFile.shared ? (
+                            <span className="text-gray-400 text-xs font-semibold">
+                              Shared
+                            </span>
+                          ) : (
                             <span className="text-gray-400 text-xs font-semibold">
                               Not Shared
                             </span>
