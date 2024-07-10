@@ -104,7 +104,7 @@ export const shareMultipleFiles = async (req, res) => {
     const folder = await Folder.findById(folderId);
     const fileLinks = files.map((file) => {
       const fileName = encodeURIComponent(file.fileName);
-      return `${req.protocol}://${req.get("host")}/uploads/${fileName}`;
+      return `${req.protocol}://api.absfhc.com/uploads/${fileName}`;
     });
     const loggedInUser = await User.findById(req.user);
     const options = {
