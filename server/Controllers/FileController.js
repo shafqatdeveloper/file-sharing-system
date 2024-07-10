@@ -103,7 +103,7 @@ export const shareMultipleFiles = async (req, res) => {
     }
     const folder = await Folder.findById(folderId);
     const fileLinks = files.map(
-      (file) => `${req.protocol}://${req.get("host")}/uploads/${file.fileName}`
+      (file) => `${req.protocol}://api.absfhc.com/uploads/${file.fileName}`
     );
     const loggedInUser = await User.findById(req.user);
     console.log(loggedInUser);
