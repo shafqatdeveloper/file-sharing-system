@@ -34,7 +34,9 @@ export const EmailPDFFIle = async (options) => {
     return fileLinks
       .map(
         (link) =>
-          `<a href="${link}" download>Download ${path.basename(link)}</a><br>`
+          `<a href="${link}" download>Download ${decodeURIComponent(
+            path.basename(link)
+          )}</a><br>`
       )
       .join("");
   };

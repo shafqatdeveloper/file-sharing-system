@@ -30,7 +30,7 @@ app.use("/api", userRouter);
 app.use("/api", folderRouter);
 app.use("/api", fileRouter);
 const __dirname = path.resolve();
-app.use("public", express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 // Listening App
 const port = 4000;
 app.listen(port, () => {

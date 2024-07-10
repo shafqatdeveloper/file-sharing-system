@@ -102,9 +102,10 @@ export const shareMultipleFiles = async (req, res) => {
       });
     }
     const folder = await Folder.findById(folderId);
+    const fileName = encodeURIComponent(file.fileName);
     const fileLinks = files.map(
       (file) =>
-        `${req.protocol}://${req.get("host")}/public/uploads/${file.fileName}`
+        `${req.protocol}://${req.get("host")}/public/uploads/${fileName}`
     );
     const loggedInUser = await User.findById(req.user);
     const options = {
