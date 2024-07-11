@@ -116,7 +116,7 @@ export const shareMultipleFiles = async (req, res) => {
     const options = {
       email,
       fileLinks,
-      sender: loggedInUser.name,
+      sender: loggedInUser.fName,
       folderName: folder.folderName,
       folderId,
       filePaths,
@@ -155,7 +155,7 @@ export const shareSingleFile = async (req, res) => {
     const loggedInUser = await User.findById(req.user);
     const options = {
       email,
-      sender: loggedInUser.name,
+      sender: loggedInUser.fName,
       folderName: folder.folderName,
       fileId: sharingFile,
       fileName: file.Name,

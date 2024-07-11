@@ -9,35 +9,59 @@ const generateVerficationToken = () => {
 };
 
 export const registerUser = async (req, res) => {
-  const { email, password } = req.body;
+  const {
+    fName,
+    lName,
+    username,
+    phoneNumber,
+    companyName,
+    aboutCompany,
+    email,
+    password,
+  } = req.body;
+  console.log(email);
   try {
-    const userExist = await User.findOne({ email });
-    if (userExist) {
+    const userExistByEmail = await User.findOne({ email });
+    if (userExistByEmail) {
       res.status(401).json({
         success: false,
         message: "User Already Exists",
       });
     } else {
-      const verificationToken = generateVerficationToken();
-      const NewUser = await User.create({
-        email,
-        password,
-        verificationToken,
-      });
-      const token = NewUser.JWTTOKEN();
-      const options = { email, verificationToken };
-      await sendEmailVerificationToken(options);
-      res
-        .status(200)
-        .cookie("token", token, {
-          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-          httpOnly: true,
-        })
-        .json({
-          success: true,
-          message: "User Registered",
-          NewUser,
+      const userExistByUsername = await User.findOne({ username });
+      if (userExistByUsername) {
+        res.status(401).json({
+          success: false,
+          message: "User Already Exists",
         });
+      } else {
+        const verificationToken = generateVerficationToken();
+        const NewUser = await User.create({
+          fName,
+          lName,
+          username,
+          phoneNumber,
+          companyName,
+          aboutCompany,
+          email,
+          password,
+          verificationToken,
+        });
+        const token = NewUser.JWTTOKEN();
+        const options = { email, verificationToken };
+        await sendEmailVerificationToken(options);
+        res
+          .status(200)
+          .cookie("token", token, {
+            expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+            httpOnly: true,
+          })
+          .json({
+            success: true,
+            message: "User Registered, Check your Email to Verify!",
+            NewUser,
+          });
+      }
     }
   } catch (error) {
     res.status(501).json({

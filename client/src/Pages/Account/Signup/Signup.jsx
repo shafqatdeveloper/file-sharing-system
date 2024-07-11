@@ -8,6 +8,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "../../../Redux/Features/Auth/AuthSlice";
 
 const SignUp = () => {
+  const [fName, setFName] = useState("");
+  const [lName, setLName] = useState("");
+  const [username, setUsername] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [aboutCompany, setAboutCompany] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,11 +33,18 @@ const SignUp = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      console.log(email);
+      console.log(fName);
       const response = await axios.post("/api/user/register", {
+        fName,
+        lName,
+        username,
+        phoneNumber,
+        companyName,
+        aboutCompany,
         email,
         password,
       });
-      console.log(response.data);
       if (response.data.success) {
         navigate("/folders?user=authenticated");
         toast(response.data.message);
@@ -47,7 +60,7 @@ const SignUp = () => {
     }
   };
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center h-full py-10 bg-gray-100">
       <div className="w-full max-w-md p-8 space-y-8 bg-white shadow-lg rounded-lg">
         <div className="text-center">
           <img src={logoImage} alt="dotloop logo" className="mx-auto" />
@@ -60,6 +73,38 @@ const SignUp = () => {
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="mb-4">
+                <label htmlFor="fName" className="sr-only">
+                  First Name
+                </label>
+                <input
+                  id="fName"
+                  name="fName"
+                  type="text"
+                  value={fName}
+                  onChange={(e) => setFName(e.target.value)}
+                  required
+                  className="appearance-none rounded-md relative block w-full px-3 py-2 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
+                  placeholder="First Name"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="lName" className="sr-only">
+                  Last Name
+                </label>
+                <input
+                  id="lName"
+                  name="lName"
+                  type="text"
+                  value={lName}
+                  onChange={(e) => setLName(e.target.value)}
+                  required
+                  className="appearance-none rounded-md relative block w-full px-3 py-2 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
+                  placeholder="Last Name"
+                />
+              </div>
+            </div>
             <div className="mb-4">
               <label htmlFor="email-address" className="sr-only">
                 Email address
@@ -75,6 +120,38 @@ const SignUp = () => {
                 placeholder="Email address"
               />
             </div>
+            <div className="flex items-center gap-2">
+              <div className="mb-4">
+                <label htmlFor="username" className="sr-only">
+                  Username
+                </label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  className="appearance-none rounded-md relative block w-full px-3 py-2 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
+                  placeholder="Username"
+                />
+              </div>
+              <div className="mb-4">
+                <label htmlFor="phoneNumber" className="sr-only">
+                  Phone Number
+                </label>
+                <input
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  type="text"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  required
+                  className="appearance-none rounded-md relative block w-full px-3 py-2 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
+                  placeholder="Phone Number"
+                />
+              </div>
+            </div>
             <div className="mb-4">
               <label htmlFor="password" className="sr-only">
                 Create your password
@@ -87,7 +164,38 @@ const SignUp = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="appearance-none rounded-md relative block w-full p-3 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
-                placeholder="Create your password"
+                placeholder="Password"
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="companyName" className="sr-only">
+                Company Name
+              </label>
+              <input
+                id="companyName"
+                name="companyName"
+                type="text"
+                required
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                className="appearance-none rounded-md relative block w-full p-3 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
+                placeholder="Company Name"
+              />
+            </div>
+            <div className="mb-4">
+              <label htmlFor="aboutCompany" className="sr-only">
+                About Company
+              </label>
+              <textarea
+                id="aboutCompany"
+                name="aboutCompany"
+                type="text"
+                required
+                value={aboutCompany}
+                rows={3}
+                onChange={(e) => setAboutCompany(e.target.value)}
+                className="appearance-none rounded-md relative block w-full p-3 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
+                placeholder="About Company"
               />
             </div>
           </div>

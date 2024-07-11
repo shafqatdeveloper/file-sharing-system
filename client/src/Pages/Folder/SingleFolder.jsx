@@ -357,7 +357,7 @@ const SingleFolder = () => {
                     return (
                       <div
                         key={index}
-                        className={`flex flex-col bg-[#e2fcdf]  rounded-md p-2 gap-1 border-2 ${
+                        className={`flex flex-col bg-white shadow-md shadow-black/20 p-2 gap-1 border-2 ${
                           isSelected
                             ? "border-primaryDark"
                             : "border-transparent"

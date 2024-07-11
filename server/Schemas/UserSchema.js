@@ -2,19 +2,21 @@ import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: false },
-  lastName: { type: String, required: false },
+  fName: { type: String, required: true },
+  lName: { type: String, required: true },
+  email: { type: String, required: true },
+  username: { type: String, required: true },
+  companyName: { type: String, required: true },
+  aboutCompany: { type: String, required: true },
+  phoneNumber: { type: String, required: true },
+  password: { type: String, required: true },
   userRole: { type: String, default: "None" },
-  email: { type: String, required: true, unique: true },
   fax: { type: String, required: false },
-  phoneNumber: { type: String, required: false },
   esignName: { type: String, required: false },
   esignInitials: { type: String, required: false },
-  companyName: { type: String, required: false },
   jobTitle: { type: String, required: false },
   tagline: { type: String, required: false },
   photo: { type: String, required: false },
-  password: { type: String, required: true },
   verificationToken: { type: String },
   verifiedUser: {
     type: Boolean,
