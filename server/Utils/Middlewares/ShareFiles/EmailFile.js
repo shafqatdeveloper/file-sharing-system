@@ -29,33 +29,30 @@ export const EmailMultiplePDFFIle = async (options) => {
   );
   console.log(pathToHTMLTemplate);
   const htmlTemplate = fs.readFileSync(pathToHTMLTemplate, "utf-8");
-
-  const generateFileLinksHTML = (fileLinks) => {
-    return fileLinks
-      .map(
-        (link) =>
-          `<a href="${link}" download>Download ${decodeURIComponent(
-            path.basename(link)
-          )}</a><br>`
-      )
-      .join("");
-  };
-
-  const fileLinksHTML = generateFileLinksHTML(options.fileLinks);
   const emailBody = htmlTemplate
     .replace("{{senderName}}", options.sender)
     .replace("{{loopName}}", options.folderName)
     .replace(
       "{{documentLink}}",
       `http://localhost:5173/folder/view/${options.folderId}`
-    )
-    .replace("{{fileLinks}}", fileLinksHTML);
+    );
+
+  const attachments = options.filePaths.map((filePath) => {
+    const fileName = decodeURIComponent(path.basename(filePath));
+    return {
+      filename: fileName,
+      path: filePath,
+    };
+  });
+
+  console.log(attachments);
 
   const mailOptions = {
     from: "info@alleviacare.com",
     to: options.email,
-    subject: `Verify your Email`,
+    subject: `${options.sender} sent you attachements`,
     html: emailBody,
+    attachments: attachments,
   };
   await transporter.sendMail(mailOptions);
 };

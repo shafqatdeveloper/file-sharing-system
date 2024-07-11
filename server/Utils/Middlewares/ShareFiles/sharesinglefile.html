@@ -15,15 +15,21 @@
             background-color: #ffffff;
             border: 1px solid #ddd;
             padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .header {
             text-align: center;
             padding: 20px;
-            background-color: #0077cc;
+            background-color: #07BC0C;
             color: #ffffff;
         }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
         .header img {
-            max-width: 150px;
+            max-width: 100px;
+            margin-bottom: 20px;
         }
         .content {
             padding: 20px;
@@ -32,15 +38,17 @@
         .content p {
             font-size: 16px;
             color: #333;
+            margin: 10px 0;
         }
         .button {
             display: inline-block;
             margin: 20px 0;
             padding: 10px 20px;
-            background-color: #0077cc;
+            background-color: #07BC0C;
             color: #ffffff;
             text-decoration: none;
             border-radius: 5px;
+            font-size: 16px;
         }
         .footer {
             padding: 20px;
@@ -48,9 +56,24 @@
             text-align: center;
             color: #888;
         }
+        .footer p {
+            margin: 10px 0;
+        }
         .footer a {
-            color: #0077cc;
+            color: #07BC0C;
             text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .header, .content, .footer {
+                padding: 10px;
+            }
+            .button {
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
@@ -60,7 +83,7 @@
             <h1>Archi Esign</h1>
         </div>
         <div class="content">
-            <p><strong>{{senderName}}</strong> has shared a document with you for loop:</p>
+            <p><strong>{{senderName}}</strong> has shared a document with you for Folder:</p>
             <p><strong>{{loopName}}</strong></p>
             <a href="{{documentLink}}" class="button">VIEW DOCUMENT</a>
         </div>
@@ -72,11 +95,9 @@
             <p>
                 700 Pete Rose Way, 4th floor,<br>
                 Cincinnati, OH 45203<br>
-                Have questions? Call us at <a href="tel:+18883685667">1(888)-DOTLOOP (368-5667)</a>
+                Have questions? Call us at <a href="tel:+18883685667">+1000000000000 (Archi Esign)</a>
             </p>
         </div>
     </div>
 </body>
-</html>
-
 </html>

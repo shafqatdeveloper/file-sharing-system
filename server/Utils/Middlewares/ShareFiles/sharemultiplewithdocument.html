@@ -11,10 +11,12 @@
         .container {
             width: 100%;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 20px auto;
             background-color: #ffffff;
             border: 1px solid #ddd;
-            padding: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         .header {
             text-align: center;
@@ -22,8 +24,9 @@
             background-color: #07BC0C;
             color: #ffffff;
         }
-        .header img {
-            max-width: 150px;
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
         }
         .content {
             padding: 20px;
@@ -32,6 +35,7 @@
         .content p {
             font-size: 16px;
             color: #333;
+            margin: 10px 0;
         }
         .button {
             display: inline-block;
@@ -41,6 +45,7 @@
             color: #ffffff;
             text-decoration: none;
             border-radius: 5px;
+            font-size: 16px;
         }
         .file-links {
             margin-top: 20px;
@@ -52,9 +57,24 @@
             text-align: center;
             color: #888;
         }
+        .footer p {
+            margin: 10px 0;
+        }
         .footer a {
             color: #07BC0C;
             text-decoration: none;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            .header, .content, .footer {
+                padding: 10px;
+            }
+            .button {
+                width: 100%;
+                box-sizing: border-box;
+            }
         }
     </style>
 </head>
@@ -67,9 +87,6 @@
             <p><strong>{{senderName}}</strong> has shared a document with you for loop:</p>
             <p><strong>{{loopName}}</strong></p>
             <a href="{{documentLink}}" class="button">VIEW DOCUMENT</a>
-            <div class="file-links">
-                {{fileLinks}}
-            </div>
         </div>
         <div class="footer">
             <p>The better way to get real estate deals done</p>
@@ -79,7 +96,7 @@
             <p>
                 700 Pete Rose Way, 4th floor,<br>
                 Cincinnati, OH 45203<br>
-                Have questions? Call us at <a href="tel:+18883685667">1(888)-DOTLOOP (368-5667)</a>
+                Have questions? Call us at <a href="tel:+18883685667">+1 (888)-368-5667 (Archi Esign)</a>
             </p>
         </div>
     </div>

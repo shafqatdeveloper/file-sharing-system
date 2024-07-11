@@ -107,7 +107,10 @@ export const shareMultipleFiles = async (req, res) => {
     const folder = await Folder.findById(folderId);
     const fileLinks = files.map((file) => {
       const fileName = encodeURIComponent(file.fileName);
-      return `${req.protocol}://api.absfhc.com/uploads/${fileName}`;
+      return `${req.protocol}://absfhc.com/uploads/${fileName}`;
+    });
+    const filePaths = files.map((file) => {
+      return file.filePath;
     });
     const loggedInUser = await User.findById(req.user);
     const options = {
@@ -116,6 +119,7 @@ export const shareMultipleFiles = async (req, res) => {
       sender: loggedInUser.name,
       folderName: folder.folderName,
       folderId,
+      filePaths,
     };
 
     await EmailMultiplePDFFIle(options);
@@ -131,7 +135,7 @@ export const shareMultipleFiles = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       success: false,
-      message: `Server Error: ${error.message}`,
+      message: ` ${error.message}`,
     });
   }
 };
