@@ -18,6 +18,7 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
   useEffect(() => {
@@ -31,6 +32,10 @@ const SignUp = () => {
   }, [isAuthenticated, navigate]);
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast.error("You must agree to the terms and conditions to proceed.");
+      return;
+    }
     setLoading(true);
     try {
       console.log(email);
@@ -197,6 +202,25 @@ const SignUp = () => {
                 className="appearance-none rounded-md relative block w-full p-3 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
                 placeholder="About Company"
               />
+            </div>
+            <div className="mb-4 flex items-center">
+              <input
+                id="termsAccepted"
+                name="termsAccepted"
+                type="checkbox"
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
+                className="h-4 w-4 text-primaryDark focus:ring-primaryDark border-gray-300 rounded"
+              />
+              <label
+                htmlFor="termsAccepted"
+                className="ml-2 block cursor-pointer text-sm text-gray-900"
+              >
+                I agree to the{" "}
+                <Link to="/terms" className="text-primaryDark underline">
+                  terms and conditions
+                </Link>
+              </label>
             </div>
           </div>
 

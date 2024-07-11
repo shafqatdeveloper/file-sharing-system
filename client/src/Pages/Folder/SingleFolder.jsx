@@ -24,12 +24,13 @@ const SingleFolder = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
   const [shareOptions, setShareOptions] = useState({
-    shareLink: false,
+    shareLink: true,
     shareFile: true,
     editable: false,
   });
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [shareLoading, setShareLoading] = useState(false);
+  const [singleShareLoading, setSingleShareLoading] = useState(false);
   const [shared, setShared] = useState(false);
   const [selectedFileToShare, setSelectedFileToShare] = useState(null);
   // Select a Single File
@@ -160,8 +161,8 @@ const SingleFolder = () => {
   const handleFileShare = async (e) => {
     e.preventDefault();
     closeShareModal();
-    setShareLoading(true);
     if (selectedFiles.length > 0) {
+      setShareLoading(true);
       try {
         const response = await axios.post(`/api/file/share/multiple`, {
           sharingFiles: selectedFiles,
@@ -185,6 +186,7 @@ const SingleFolder = () => {
         setShareLoading(false);
       }
     } else {
+      setSingleShareLoading(true);
       try {
         const response = await axios.post(`/api/file/share/single`, {
           sharingFile: selectedFileToShare,
@@ -205,7 +207,7 @@ const SingleFolder = () => {
             "Something went wrong. Please try again."
         );
       } finally {
-        setShareLoading(false);
+        setSingleShareLoading(false);
       }
     }
   };
@@ -338,7 +340,8 @@ const SingleFolder = () => {
                     <input
                       type="checkbox"
                       checked={
-                        selectedFiles.length === folder?.files?.length
+                        selectedFiles.length === folder?.files?.length &&
+                        selectedFiles.length > 0
                           ? true
                           : false
                       }
@@ -383,12 +386,12 @@ const SingleFolder = () => {
                               setSelectedFileToShare(pdfFile._id);
                             }}
                             className={`${
-                              shareLoading
+                              singleShareLoading
                                 ? "bg-transparent border-2 border-primaryDark"
                                 : "bg-primaryDark text-white"
                             }  w-14 h-9 rounded-md  uppercase text-sm font-semibold`}
                           >
-                            {shareLoading &&
+                            {singleShareLoading &&
                             pdfFile._id === selectedFileToShare ? (
                               <Loader />
                             ) : (
@@ -524,7 +527,9 @@ const SingleFolder = () => {
             />
           </div>
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium">Options</label>
+            <label className="block mb-2 text-sm font-medium">
+              Share Settings
+            </label>
             <div className="flex items-center mb-2">
               <input
                 type="checkbox"
@@ -539,7 +544,7 @@ const SingleFolder = () => {
                 className="mr-2"
               />
               <label htmlFor="shareLink" className="text-sm">
-                Share Link Only
+                Share Link
               </label>
             </div>
             <div className="flex items-center mb-2">

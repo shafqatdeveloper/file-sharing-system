@@ -112,14 +112,23 @@ export const shareMultipleFiles = async (req, res) => {
     const filePaths = files.map((file) => {
       return file.filePath;
     });
+    const singleFileLinks = files.map(
+      (file) => `${req.protocol}://absfhc.com/file/view/${file._id}`
+    );
     const loggedInUser = await User.findById(req.user);
+    const isReceiverMember = await User.findOne({ email });
     const options = {
       email,
       fileLinks,
+      recevierMember: isReceiverMember ? true : false,
+      editable: shareSetting.editable,
+      linkOnly: shareSetting.shareLink,
+      fileOnly: shareSetting.shareFile,
       sender: loggedInUser.fName,
       folderName: folder.folderName,
       folderId,
       filePaths,
+      singleFileLinks,
     };
 
     await EmailMultiplePDFFIle(options);
@@ -144,7 +153,6 @@ export const shareSingleFile = async (req, res) => {
   try {
     const { sharingFile, folderId, shareSetting, email } = req.body;
     const file = await FileUpload.findById(sharingFile);
-
     if (!file) {
       return res.status(404).json({
         success: false,
@@ -153,10 +161,15 @@ export const shareSingleFile = async (req, res) => {
     }
     const folder = await Folder.findById(folderId);
     const loggedInUser = await User.findById(req.user);
+    const isReceiverMember = await User.findOne({ email });
     const options = {
       email,
       sender: loggedInUser.fName,
+      recevierMember: isReceiverMember ? true : false,
       folderName: folder.folderName,
+      editable: shareSetting.editable,
+      linkOnly: shareSetting.shareLink,
+      fileOnly: shareSetting.shareFile,
       fileId: sharingFile,
       fileName: file.Name,
       filePath: file.filePath,
