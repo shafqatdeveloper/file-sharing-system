@@ -47,7 +47,7 @@ function App() {
       }
     };
     checkVerification();
-  }, [dispatch]);
+  }, [dispatch, navigate]);
 
   return (
     <div className="bg-white">
