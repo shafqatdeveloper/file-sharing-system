@@ -2,7 +2,7 @@ import React, { Suspense, lazy, useEffect, useState } from "react";
 import Navbar from "./Components/Navbar";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import SuspenseLoader from "./Components/Loaders/SuspenseLoader";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { pdfjs } from "react-pdf";
 import NotFound from "./Pages/NotFound/404";
@@ -11,8 +11,9 @@ import "./App.css";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./Redux/Features/Auth/AuthSlice";
 import AuthNavbar from "./Components/AuthNavbar";
-import UnverifiedUserPopup from "./Components/UnverifiedUserPopup";
 import axios from "axios";
+import Loader from "./Components/Loaders/Loader";
+import { AiOutlineClose } from "react-icons/ai";
 
 const Home = lazy(() => import("../src/Pages/Home/Home"));
 const Login = lazy(() => import("../src/Pages/Account/Login/Login"));
@@ -35,6 +36,7 @@ function App() {
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
   const [isNotVerifiedUser, setIsNotVerifiedUser] = useState(false);
+  const [visible, setVisible] = useState(false);
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
@@ -44,17 +46,63 @@ function App() {
       const response = await axios.get("/api/user/check/verification");
       if (response.data.success) {
         setIsNotVerifiedUser(true);
+        setVisible(true);
       }
     };
     checkVerification();
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, visible]);
+
+  const [laoding, setLaoding] = useState(false);
+  const resendVerificationEmailHandler = async (e) => {
+    e.preventDefault();
+    setLaoding(true);
+    try {
+      const response = await axios.get(`/api/user/resend/verification-email`);
+      if (response.data.success) {
+        toast(response.data.message);
+        setVisible(false);
+        window.location.reload();
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      setLaoding(false);
+    }
+  };
 
   return (
     <div className="bg-white">
       {isAuthenticated ? (
         <div>
           <AuthNavbar />
-          {isNotVerifiedUser && <UnverifiedUserPopup />}
+          {isNotVerifiedUser && (
+            <div
+              className={`w-full ${
+                visible ? "flex" : "hidden"
+              } h-full  flex-col sm:flex-row gap-2 items-center justify-between text-white bg-red-600 py-2 px-2`}
+            >
+              <h1>You have not verified your Email Address Yet!</h1>
+              <div className="sm:pr-6 flex items-center justify-center gap-3">
+                <button
+                  className="bg-green-500 h-9 w-52 px-2 rounded-md"
+                  disabled={laoding ? true : false}
+                  onClick={resendVerificationEmailHandler}
+                >
+                  {laoding ? <Loader /> : "Resend Verification Email"}
+                </button>
+                <AiOutlineClose
+                  className="cursor-pointer"
+                  size={24}
+                  onClick={() => setVisible(false)}
+                />
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <Navbar />
