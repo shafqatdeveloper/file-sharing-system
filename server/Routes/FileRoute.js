@@ -7,6 +7,7 @@ import upload from "../Config/Multer.js";
 import {
   getSingleFile,
   getSingleFileDetails,
+  shareFileByReceiver,
   shareMultipleFiles,
   shareSingleFile,
   uploadFile,
@@ -38,6 +39,12 @@ Router.post(
   isAuthenticatedUser,
   authorizeVerifiedUser(),
   shareSingleFile
+);
+Router.post(
+  "/file/share/by-receiver",
+  isAuthenticatedUser,
+  authorizeVerifiedUser(),
+  shareFileByReceiver
 );
 
 export default Router;

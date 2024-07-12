@@ -14,6 +14,7 @@ import AuthNavbar from "./Components/AuthNavbar";
 import axios from "axios";
 import Loader from "./Components/Loaders/Loader";
 import { AiOutlineClose } from "react-icons/ai";
+import EditFileViewer from "./Pages/EditFile/EditFileViewer";
 
 const Home = lazy(() => import("../src/Pages/Home/Home"));
 const Login = lazy(() => import("../src/Pages/Account/Login/Login"));
@@ -120,6 +121,10 @@ function App() {
           <Route path="/folders" element={<AuthHome />} />
           <Route path="/folder/view/:folderId" element={<SingleFolder />} />
           <Route path="/file/view/:fileId" element={<ViewSingleFile />} />
+          <Route
+            path="/file/view/receiver/:fileId"
+            element={<EditFileViewer />}
+          />
           <Route
             path="/verify-email/:verificationToken"
             element={<VerifyUserEmail />}

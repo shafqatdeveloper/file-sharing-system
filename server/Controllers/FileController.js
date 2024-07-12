@@ -4,6 +4,7 @@ import path from "path";
 import fs from "fs";
 import {
   EmailMultiplePDFFIle,
+  EmailPDFFIleByReceiver,
   EmailSinglePDFFIle,
 } from "../Utils/Middlewares/ShareFiles/EmailFile.js";
 import User from "../Schemas/UserSchema.js";
@@ -112,10 +113,11 @@ export const shareMultipleFiles = async (req, res) => {
     const filePaths = files.map((file) => {
       return file.filePath;
     });
-    const singleFileLinks = files.map(
-      (file) => `${req.protocol}://absfhc.com/file/view/${file._id}`
-    );
     const loggedInUser = await User.findById(req.user);
+    const singleFileLinks = files.map(
+      (file) =>
+        `${req.protocol}://absfhc.com/file/view/receiver/${file._id}?sender=${loggedInUser._id}`
+    );
     const isReceiverMember = await User.findOne({ email });
     const options = {
       email,
@@ -173,6 +175,7 @@ export const shareSingleFile = async (req, res) => {
       fileId: sharingFile,
       fileName: file.Name,
       filePath: file.filePath,
+      senderId: loggedInUser._id,
     };
     await EmailSinglePDFFIle(options);
     file.shared = true;
@@ -185,6 +188,40 @@ export const shareSingleFile = async (req, res) => {
     res.status(500).json({
       success: false,
       message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+export const shareFileByReceiver = async (req, res) => {
+  try {
+    const { fileId, email, sendingBackToSender } = req.body;
+    const file = await FileUpload.findById(fileId);
+    if (!file) {
+      return res.status(404).json({
+        success: false,
+        message: "File not Found",
+      });
+    }
+    const loggedInUser = await User.findById(req.user);
+    const options = {
+      email,
+      sender: loggedInUser.fName,
+      fileId: fileId,
+      fileName: file.Name,
+      filePath: file.filePath,
+      sendingBackToSender,
+    };
+    await EmailPDFFIleByReceiver(options);
+    file.shared = true;
+    await file.save();
+    res.status(200).json({
+      success: true,
+      message: "File Sent Successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: `${error.message}`,
     });
   }
 };

@@ -345,3 +345,28 @@ export const updateAdminInfo = async (req, res) => {
     });
   }
 };
+
+// Get Single User Details
+
+export const singleUserDetails = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const singleUser = await User.findById(userId);
+    if (!singleUser) {
+      res.status(402).json({
+        success: false,
+        message: "User not found",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        singleUser,
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};

@@ -9,6 +9,7 @@ import {
   logout,
   registerUser,
   resendVerificationEmail,
+  singleUserDetails,
   updateAdminInfo,
   verifyUserEmail,
 } from "../Controllers/UserController.js";
@@ -49,6 +50,12 @@ Router.get(
   "/user/resend/verification-email",
   isAuthenticatedUser,
   resendVerificationEmail
+);
+
+Router.get(
+  "/user/single/details/:userId",
+  isAuthenticatedUser,
+  singleUserDetails
 );
 
 export default Router;
