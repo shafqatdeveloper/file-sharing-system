@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from "react";
+import React, { Suspense, lazy, useEffect, useState } from "react";
 import Navbar from "./Components/Navbar";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import SuspenseLoader from "./Components/Loaders/SuspenseLoader";
@@ -11,6 +11,8 @@ import "./App.css";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "./Redux/Features/Auth/AuthSlice";
 import AuthNavbar from "./Components/AuthNavbar";
+import UnverifiedUserPopup from "./Components/UnverifiedUserPopup";
+import axios from "axios";
 
 const Home = lazy(() => import("../src/Pages/Home/Home"));
 const Login = lazy(() => import("../src/Pages/Account/Login/Login"));
@@ -32,14 +34,31 @@ function App() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
-  console.log("Auth App.jsx", isAuthenticated);
+  const [isNotVerifiedUser, setIsNotVerifiedUser] = useState(false);
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
 
+  useEffect(() => {
+    const checkVerification = async () => {
+      const response = await axios.get("/api/user/check/verification");
+      if (response.data.success) {
+        setIsNotVerifiedUser(true);
+      }
+    };
+    checkVerification();
+  }, [dispatch]);
+
   return (
     <div className="bg-white">
-      {isAuthenticated ? <AuthNavbar /> : <Navbar />}
+      {isAuthenticated ? (
+        <div>
+          <AuthNavbar />
+          {isNotVerifiedUser && <UnverifiedUserPopup />}
+        </div>
+      ) : (
+        <Navbar />
+      )}
       <TopLoadingBar />
       <ToastContainer theme="dark" />
       <Suspense fallback={<SuspenseLoader />}>

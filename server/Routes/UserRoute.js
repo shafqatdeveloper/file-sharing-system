@@ -3,10 +3,12 @@ import upload from "../Config/Multer.js";
 import {
   addAdmin,
   changePassword,
+  isNotVerifiedUser,
   loggedInUser,
   loginUser,
   logout,
   registerUser,
+  resendVerificationEmail,
   updateAdminInfo,
   verifyUserEmail,
 } from "../Controllers/UserController.js";
@@ -40,6 +42,13 @@ Router.put(
   auhtorizeRoles("admin"),
   upload.single("profilePic"),
   updateAdminInfo
+);
+
+Router.get("/user/check/verification", isAuthenticatedUser, isNotVerifiedUser);
+Router.get(
+  "/user/resend/verification-email",
+  isAuthenticatedUser,
+  resendVerificationEmail
 );
 
 export default Router;

@@ -98,6 +98,59 @@ export const verifyUserEmail = async (req, res) => {
   }
 };
 
+// Resend Verification Email
+
+export const resendVerificationEmail = async (req, res) => {
+  try {
+    const loggedInUser = await User.findById(req.user);
+    if (loggedInUser.verifiedUser) {
+      res.status(401).json({
+        success: false,
+        message: `User Email is already Verified`,
+      });
+    } else {
+      loggedInUser.verificationToken = undefined;
+      await loggedInUser.save();
+      const verificationToken = generateVerficationToken();
+      const options = { email: loggedInUser.email, verificationToken };
+      await sendEmailVerificationToken(options);
+      loggedInUser.verificationToken = verificationToken;
+      await loggedInUser.save();
+      res.status(200).json({
+        success: true,
+        message: "Verification Email Sent!",
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+// Check if User is not Verified
+export const isNotVerifiedUser = async (req, res) => {
+  try {
+    const loggedInUser = await User.findById(req.user);
+    if (!loggedInUser.verifiedUser) {
+      res.status(200).json({
+        success: true,
+      });
+    } else {
+      res.status(401).json({
+        success: false,
+        message: "User Verified",
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error ${error.message}`,
+    });
+  }
+};
+
 // Login User
 
 export const loginUser = async (req, res) => {
