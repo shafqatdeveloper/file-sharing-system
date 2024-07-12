@@ -50,7 +50,7 @@ function App() {
       }
     };
     checkVerification();
-  }, [dispatch, navigate, visible]);
+  }, []);
 
   const [laoding, setLaoding] = useState(false);
   const resendVerificationEmailHandler = async (e) => {
@@ -61,7 +61,6 @@ function App() {
       if (response.data.success) {
         toast(response.data.message);
         setVisible(false);
-        window.location.reload();
       } else {
         toast.error(response.data.message);
       }
