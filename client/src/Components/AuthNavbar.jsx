@@ -148,10 +148,21 @@ const AuthNavbar = () => {
                   </Link>
                 </div>
               </div>
-              <div className="mt-2 w-full">
+              <div className="mt-2 w-full flex flex-col gap-1">
+                <Link
+                  to={"/my/account"}
+                  onClick={() => {
+                    setIsOpen(false);
+                    setProfileSectionOpen(false);
+                  }}
+                  className="flex w-full bg-green-100 p-3 font-bold font-sans text-green-500 items-center gap-5"
+                >
+                  <FaUserAlt size={25} />
+                  My Account
+                </Link>
                 <button
                   onClick={handleLogout}
-                  className="flex w-full hover:bg-red-100 p-3 font-bold font-sans text-red-500 items-center gap-1"
+                  className="flex w-full bg-red-100 p-3 font-bold font-sans text-red-500 items-center gap-5"
                 >
                   <IoIosLogOut size={25} />
                   LOGOUT
