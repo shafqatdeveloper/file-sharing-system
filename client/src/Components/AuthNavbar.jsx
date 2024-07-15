@@ -7,7 +7,7 @@ import logo from "../assets//logo.png";
 import { useDispatch } from "react-redux";
 import { checkAuth } from "../Redux/Features/Auth/AuthSlice";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { FaRegFolderOpen } from "react-icons/fa";
+import { FaRegFolderOpen, FaUserAlt } from "react-icons/fa";
 import { GoPeople } from "react-icons/go";
 import { RiTaskLine } from "react-icons/ri";
 import { IoIosLogOut } from "react-icons/io";
@@ -264,10 +264,21 @@ const AuthNavbar = () => {
                       </Link>
                     </div>
                   </div>
-                  <div className="mt-2 w-full">
+                  <div className="mt-2 w-full flex flex-col gap-1">
+                    <Link
+                      to={"/my/account"}
+                      onClick={() => {
+                        setIsOpen(false);
+                        setMobileProfileSectionOpen(false);
+                      }}
+                      className="flex w-full bg-green-100 p-3 font-bold font-sans text-green-500 items-center gap-5"
+                    >
+                      <FaUserAlt size={25} />
+                      My Account
+                    </Link>
                     <button
                       onClick={handleLogout}
-                      className="flex w-full hover:bg-red-100 p-3 font-bold font-sans text-red-500 items-center gap-1"
+                      className="flex w-full bg-red-100 p-3 font-bold font-sans text-red-500 items-center gap-5"
                     >
                       <IoIosLogOut size={25} />
                       LOGOUT

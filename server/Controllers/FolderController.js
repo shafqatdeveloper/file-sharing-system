@@ -1,6 +1,7 @@
 import Company from "../Schemas/CompanySchema.js";
 import Folder from "../Schemas/FolderSchema.js";
 
+// Create a Folder
 export const createFolder = async (req, res) => {
   const { folderName } = req.body;
   const folderPic = req.file;
@@ -36,6 +37,7 @@ export const createFolder = async (req, res) => {
   }
 };
 
+// Get Folders by Company Id
 export const getFoldersByCompany = async (req, res) => {
   try {
     const { companyId } = req.params;
@@ -52,6 +54,7 @@ export const getFoldersByCompany = async (req, res) => {
   }
 };
 
+// Get Single Folder by ID
 export const getSingleFolder = async (req, res) => {
   try {
     const { folderId } = req.params;

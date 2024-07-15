@@ -33,6 +33,7 @@ const SingleFolder = lazy(() => import("../src/Pages/Folder/SingleFolder"));
 const ViewSingleFile = lazy(() => import("../src/Pages/FileViewer/PdfViewer"));
 const AuthHome = lazy(() => import("../src/Pages/Companies/Companies"));
 const AddCompany = lazy(() => import("../src/Pages/AddCompany/AddCompany"));
+const MyAccount = lazy(() => import("../src/Pages/Account/Profile/Profile"));
 const BrowseTemplates = lazy(() =>
   import("../src/Pages/Templates/AllTemplates")
 );
@@ -131,6 +132,7 @@ function App() {
           <Route path="/home" element={<AuthHome />} />
           <Route path="/company/add" element={<AddCompany />} />
           <Route path="/templates/browse" element={<BrowseTemplates />} />
+          <Route path="/my/account" element={<MyAccount />} />
           <Route
             path="/file/view/receiver/:fileId"
             element={<EditFileViewer />}
