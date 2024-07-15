@@ -8,9 +8,9 @@ import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 import { useReactToPrint } from "react-to-print";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
-import ReactModal from "react-modal";
 import "./EditFileViewer.css";
 import { toast } from "react-toastify";
+import Loader from "../../Components/Loaders/Loader";
 
 const EditFileViewer = () => {
   const { fileId } = useParams();
@@ -26,12 +26,14 @@ const EditFileViewer = () => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageWidth, setPageWidth] = useState(800);
+  // Getting Sender Id From Params
   const searchParams = new URLSearchParams(location.search);
-  const [sender, setSender] = useState(null);
   const senderId = searchParams.get("sender");
+  const [sender, setSender] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [shareOption, setShareOption] = useState("sender");
   const [receiverEmail, setReceiverEmail] = useState("");
+  const [fileShareLoading, setFileShareLoading] = useState(false);
 
   // Function to handle modal opening
   const handleShareClick = () => {
@@ -132,8 +134,11 @@ const EditFileViewer = () => {
     pageStyle: () => "@page { size: auto; margin: 10mm; }",
   });
 
+  // File Share Handler
   const handleFileShare = async (e) => {
     e.preventDefault();
+    setModalOpen(false);
+    setFileShareLoading(true);
     try {
       const response = await axios.post("/api/file/share/by-receiver", {
         fileId,
@@ -147,6 +152,8 @@ const EditFileViewer = () => {
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setFileShareLoading(false);
     }
   };
 
@@ -154,7 +161,7 @@ const EditFileViewer = () => {
     <div className="min-h-screen w-full flex flex-col items-center gap-4 mt-5 px-1">
       <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-center rounded-md bg-gray-800 w-full sm:w-3/4 p-4 text-black">
         <div className="text-white flex items-center gap-4">
-          <Link to={`${location?.state?.from}`}>
+          <Link to={`${location?.state?.from ? location?.state?.from : "/"}`}>
             <MdOutlineKeyboardArrowLeft
               className="text-primaryDark"
               size={30}
@@ -240,9 +247,10 @@ const EditFileViewer = () => {
             </button>
             <button
               onClick={handleShareClick}
-              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+              disabled={fileShareLoading ? true : false}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold w-20 h-10 rounded"
             >
-              Share
+              {fileShareLoading ? <Loader /> : "Share"}
             </button>
           </div>
         </div>
@@ -284,6 +292,7 @@ const EditFileViewer = () => {
                 </h1>
                 <div className="flex items-center justify-center">
                   <button
+                    disabled={!sender?.email ? true : false}
                     onClick={handleFileShare}
                     className="bg-primaryDark text-white px-4 py-1 rounded-md"
                   >
@@ -308,6 +317,7 @@ const EditFileViewer = () => {
                 <div className="flex items-center justify-center">
                   <button
                     onClick={handleFileShare}
+                    disabled={receiverEmail === "" ? true : false}
                     className="bg-primaryDark text-white px-4 py-1 rounded-md"
                   >
                     Share

@@ -11,6 +11,13 @@ const userSchema = new mongoose.Schema({
   phoneNumber: { type: String, required: true },
   password: { type: String, required: true },
   userRole: { type: String, default: "None" },
+  companies: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "company",
+      required: true,
+    },
+  ],
   fax: { type: String, required: false },
   esignName: { type: String, required: false },
   esignInitials: { type: String, required: false },

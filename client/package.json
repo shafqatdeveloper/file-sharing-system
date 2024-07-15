@@ -22,6 +22,7 @@
     "react-doc-viewer": "^0.1.12",
     "react-dom": "^18.2.0",
     "react-draggable": "^4.4.6",
+    "react-dropzone": "^14.2.3",
     "react-icons": "^5.2.1",
     "react-modal": "^3.16.1",
     "react-pdf": "^9.0.0",

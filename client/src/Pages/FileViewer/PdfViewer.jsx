@@ -102,7 +102,7 @@ const FileViewer = () => {
     <div className="min-h-screen w-full flex flex-col items-center gap-4 mt-5 px-1">
       <div className="flex flex-col md:flex-row gap-4 md:gap-0 justify-between items-center rounded-md bg-gray-800 w-full sm:w-3/4 p-4 text-black">
         <div className="text-white flex items-center gap-4">
-          <Link to={`${location?.state?.from}`}>
+          <Link to={`${location?.state?.from ? location?.state?.from : "/"}`}>
             <MdOutlineKeyboardArrowLeft
               className="text-primaryDark"
               size={30}

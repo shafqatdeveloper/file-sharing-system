@@ -8,6 +8,7 @@ import { mongodbConnection } from "./Config/Connection.js";
 import folderRouter from "./Routes/FolderRoute.js";
 import fileRouter from "./Routes/FileRoute.js";
 import path from "path";
+import companyRouter from "./Routes/CompanyRoute.js";
 const app = express();
 
 // Configuring DOTENV
@@ -29,6 +30,7 @@ app.use(cors());
 app.use("/api", userRouter);
 app.use("/api", folderRouter);
 app.use("/api", fileRouter);
+app.use("/api", companyRouter);
 const __dirname = path.resolve();
 app.use("/uploads", express.static(path.join(__dirname, "public", "uploads")));
 // Listening App

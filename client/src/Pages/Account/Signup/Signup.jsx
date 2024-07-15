@@ -27,7 +27,7 @@ const SignUp = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/folders?user=authenticated");
+      navigate("/home?user=authenticated");
     }
   }, [isAuthenticated, navigate]);
   const handleSubmit = async (e) => {

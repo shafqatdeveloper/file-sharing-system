@@ -16,19 +16,26 @@ import Loader from "./Components/Loaders/Loader";
 import { AiOutlineClose } from "react-icons/ai";
 import EditFileViewer from "./Pages/EditFile/EditFileViewer";
 
-const Home = lazy(() => import("../src/Pages/Home/Home"));
+const UnAuthenticatedHome = lazy(() =>
+  import("../src/Pages/UnAuthenticatedHome/UnAuthenticatedHome")
+);
 const Login = lazy(() => import("../src/Pages/Account/Login/Login"));
 const Signup = lazy(() => import("../src/Pages/Account/Signup/Signup"));
 const DevelopmentPage = lazy(() =>
   import("../src/Pages/Development/PageUnderDev")
 );
-const AuthHome = lazy(() => import("../src/Pages/AuthenticatedHome/AuthHome"));
+const Folders = lazy(() => import("./Pages/Folders/Folders"));
 const VerifyUserEmail = lazy(() =>
   import("../src/Pages/Account/VerifyEmail/VerifyEmail")
 );
 const AddFolder = lazy(() => import("../src/Pages/AddFolder/Steeper"));
 const SingleFolder = lazy(() => import("../src/Pages/Folder/SingleFolder"));
 const ViewSingleFile = lazy(() => import("../src/Pages/FileViewer/PdfViewer"));
+const AuthHome = lazy(() => import("../src/Pages/Companies/Companies"));
+const AddCompany = lazy(() => import("../src/Pages/AddCompany/AddCompany"));
+const BrowseTemplates = lazy(() =>
+  import("../src/Pages/Templates/AllTemplates")
+);
 
 function App() {
   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -111,16 +118,19 @@ function App() {
       <ToastContainer theme="dark" />
       <Suspense fallback={<SuspenseLoader />}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<UnAuthenticatedHome />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/pricing" element={<DevelopmentPage />} />
           <Route path="/team" element={<DevelopmentPage />} />
           <Route path="/resources" element={<DevelopmentPage />} />
           <Route path="/contact/sales" element={<DevelopmentPage />} />
-          <Route path="/folders" element={<AuthHome />} />
+          <Route path="/company/folders/:companyId" element={<Folders />} />
           <Route path="/folder/view/:folderId" element={<SingleFolder />} />
           <Route path="/file/view/:fileId" element={<ViewSingleFile />} />
+          <Route path="/home" element={<AuthHome />} />
+          <Route path="/company/add" element={<AddCompany />} />
+          <Route path="/templates/browse" element={<BrowseTemplates />} />
           <Route
             path="/file/view/receiver/:fileId"
             element={<EditFileViewer />}
@@ -129,7 +139,7 @@ function App() {
             path="/verify-email/:verificationToken"
             element={<VerifyUserEmail />}
           />
-          <Route path="/folder/add" element={<AddFolder />} />
+          <Route path="/folder/add/:companyId" element={<AddFolder />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

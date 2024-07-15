@@ -6,21 +6,25 @@ import {
 } from "../Utils/Middlewares/AuthMiddleware.js";
 import {
   createFolder,
+  getFoldersByCompany,
   getSingleFolder,
-  getUserFolders,
 } from "../Controllers/FolderController.js";
 import upload from "../Config/Multer.js";
 
 const Router = express.Router();
 
 Router.post(
-  "/folder/add",
+  "/folder/add/:companyId",
   isAuthenticatedUser,
   authorizeVerifiedUser(),
   upload.single("folderPic"),
   createFolder
 );
-Router.get("/user/folders", isAuthenticatedUser, getUserFolders);
+Router.get(
+  "/company/folders/:companyId",
+  isAuthenticatedUser,
+  getFoldersByCompany
+);
 Router.get(
   "/user/folder/single/:folderId",
   isAuthenticatedUser,

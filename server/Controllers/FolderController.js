@@ -1,10 +1,13 @@
+import Company from "../Schemas/COmpanySchema.js";
 import Folder from "../Schemas/FolderSchema.js";
 
 export const createFolder = async (req, res) => {
   const { folderName } = req.body;
   const folderPic = req.file;
+  const { companyId } = req.params;
   try {
     const folderExists = await Folder.findOne({ folderName });
+    const parentCompany = await Company.findById(companyId);
     if (folderExists) {
       res.status(401).json({
         success: false,
@@ -15,7 +18,10 @@ export const createFolder = async (req, res) => {
         folderName,
         folderAdmin: req.user,
         folderPic: folderPic.filename,
+        parentCompany: companyId,
       });
+      parentCompany.folders.push(createdFolder._id);
+      await parentCompany.save();
       res.status(200).json({
         success: true,
         message: "Folder Created Successfully",
@@ -30,9 +36,10 @@ export const createFolder = async (req, res) => {
   }
 };
 
-export const getUserFolders = async (req, res) => {
+export const getFoldersByCompany = async (req, res) => {
   try {
-    const folders = await Folder.find({ folderAdmin: req.user });
+    const { companyId } = req.params;
+    const folders = await Folder.find({ parentCompany: companyId });
     res.status(200).json({
       success: true,
       folders,

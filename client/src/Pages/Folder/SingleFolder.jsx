@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { checkAuth } from "../../Redux/Features/Auth/AuthSlice";
 import { toast } from "react-toastify";
-import { AiOutlineCloudUpload } from "react-icons/ai";
+import { TiDocumentText } from "react-icons/ti";
 import axios from "axios";
 import { MdOutlinePersonOutline, MdPersonOutline } from "react-icons/md";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Loader from "../../Components/Loaders/Loader";
 import Modal from "react-modal";
+import { useDropzone } from "react-dropzone";
 import "./SingleFolder.css";
+import BrowseTemplate from "../../Components/BrowseTemplate";
 
 Modal.setAppElement("#root");
 
@@ -33,6 +35,7 @@ const SingleFolder = () => {
   const [singleShareLoading, setSingleShareLoading] = useState(false);
   const [shared, setShared] = useState(false);
   const [selectedFileToShare, setSelectedFileToShare] = useState(null);
+
   // Select a Single File
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelected) =>
@@ -41,6 +44,7 @@ const SingleFolder = () => {
         : [...prevSelected, fileId]
     );
   };
+
   // Select all FIles
   const handleSelectAll = () => {
     const allFileIds = folder.files.map((file) => file._id);
@@ -212,6 +216,18 @@ const SingleFolder = () => {
     }
   };
 
+  // Dropzone setup
+  const onDrop = useCallback((acceptedFiles) => {
+    if (acceptedFiles.length > 0) {
+      setUploadingFile(acceptedFiles[0]);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: "application/pdf",
+  });
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
@@ -269,7 +285,9 @@ const SingleFolder = () => {
               </p>
             </div>
             <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark">
-              <Link to={"/folder/add"}>+ Add a Folder</Link>
+              <Link to={`/folder/add/${folder?.parentCompany}`}>
+                + Add a Folder
+              </Link>
             </button>
           </div>
           <div className="flex justify-between items-center mt-4">
@@ -288,30 +306,32 @@ const SingleFolder = () => {
                 <Loader />
               </div>
             ) : (
-              <div
-                className={
-                  documentUploader
-                    ? "mt-6 w-full transition-all border-b-[1px] pb-8 duration-300"
-                    : "opacity-0 hidden transition-all border-b-[1px] pb-8 duration-300"
-                }
-              >
-                <label
-                  htmlFor="file-upload"
-                  className="border border-primaryDark flex flex-col gap-1 items-center border-dashed bg-gray-100 py-14 rounded text-center cursor-pointer"
+              <div className="grid grid-cols-1  sm:grid-cols-2 gap-2">
+                <div className="">
+                  <BrowseTemplate folderId={folderId} />
+                </div>
+                <div
+                  className={
+                    documentUploader
+                      ? " w-full transition-all  duration-300"
+                      : "opacity-0 hidden transition-all border-b-[1px] pb-8 duration-300"
+                  }
                 >
-                  <h3 className="text-primaryDark font-bold">BROWSE</h3>
-                  <AiOutlineCloudUpload size={25} className="text-gray-500" />
-                  <p>
-                    Search and add any PDF from your computer into this folder.
-                  </p>
-                  <input
-                    onChange={handleFileChange}
-                    id="file-upload"
-                    type="file"
-                    accept="application/pdf"
-                    className="hidden"
-                  />
-                </label>
+                  <div
+                    {...getRootProps()}
+                    className="border border-primaryDark h-64 flex flex-col gap-1 items-center border-dashed bg-green-100 py-14 rounded text-center cursor-pointer"
+                  >
+                    <input {...getInputProps()} />
+                    <TiDocumentText className="text-primaryDark text-5xl" />
+                    <h2 className="text-primaryDark text-lg font-semibold">
+                      Browse
+                    </h2>
+                    <p className="text-sm w-2/3 pt-3 text-gray-500">
+                      Drag and drop any PDF from your computer into this folder
+                      or click to browse.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
             <h1 className="mt-4 border-b-[1.5px] text-xl font-semibold font-sans border-b-primaryDark">

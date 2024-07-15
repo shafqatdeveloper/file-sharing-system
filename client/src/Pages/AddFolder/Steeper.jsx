@@ -13,7 +13,7 @@ import { styled } from "@mui/material/styles";
 import FolderName from "./FolderName";
 import FolderPhoto from "./FolderPhoto";
 import FinishFolderCreation from "./FinishFolderCreation";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "../../Redux/Features/Auth/AuthSlice";
 import ButtonLoader from "../../Components/Loaders/ButtonLoader";
@@ -39,12 +39,12 @@ const StepperPage = () => {
   const [photo, setPhoto] = useState(null);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-
+  const { companyId } = useParams();
   const handleNext = async () => {
     const validationErrors = validateStep(activeStep);
     if (Object.keys(validationErrors).length === 0) {
       if (activeStep === steps.length - 2) {
-        await submitData();
+        await addFolderHandler();
       } else {
         setActiveStep((prevActiveStep) => prevActiveStep + 1);
       }
@@ -69,13 +69,13 @@ const StepperPage = () => {
     return validationErrors;
   };
 
-  const submitData = async () => {
+  const addFolderHandler = async () => {
     setLoading(true);
     const form = new FormData();
     form.append("folderName", folderName);
     form.append("folderPic", photo);
     try {
-      const response = await axios.post("/api/folder/add", form);
+      const response = await axios.post(`/api/folder/add/${companyId}`, form);
       if (response.data.success) {
         setFolderData(response.data.createdFolder);
         toast(response.data.message);
@@ -173,7 +173,7 @@ const StepperPage = () => {
               {activeStep === steps.length - 1 ? (
                 <Link
                   className="underline text-primaryDark w-full sm:w-auto text-center"
-                  to={"/folders"}
+                  to={`/company/folders/${companyId}`}
                 >
                   Back to my Folders
                 </Link>
@@ -218,7 +218,7 @@ const StepperPage = () => {
                 {activeStep === steps.length - 1 ? (
                   <Link
                     className="text-white bg-primaryDark rounded-full p-2 w-full sm:w-auto text-center"
-                    to={`/folder/my/view/${folderData._id}`}
+                    to={`/folder/view/${folderData._id}`}
                   >
                     View Folder
                   </Link>
