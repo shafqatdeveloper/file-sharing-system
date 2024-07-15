@@ -1,4 +1,4 @@
-import Company from "../Schemas/COmpanySchema.js";
+import Company from "../Schemas/CompanySchema.js";
 import Folder from "../Schemas/FolderSchema.js";
 
 export const createFolder = async (req, res) => {
