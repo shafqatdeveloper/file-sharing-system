@@ -1,4 +1,4 @@
-import Company from "../Schemas/COmpanySchema.js";
+import Company from "../Schemas/CompanySchema.js";
 import User from "../Schemas/UserSchema.js";
 
 // Create a New Company
