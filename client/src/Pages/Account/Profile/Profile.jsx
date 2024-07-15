@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
 
 const MyAccount = () => {
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    fName: "",
+    lName: "",
     email: "",
     username: "",
     phoneNumber: "",
@@ -19,6 +19,21 @@ const MyAccount = () => {
     photo: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
+
+  useEffect(() => {
+    // Fetch data from backend API
+    fetch("/api/user/me")
+      .then((response) => response.json())
+      .then((data) => {
+        setFormData(data.loggedInUser);
+        if (data.loggedInUser.photo) {
+          setImagePreview(data.loggedInUser.photo);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -45,11 +60,8 @@ const MyAccount = () => {
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
     });
-    Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
-      console.log(`Formdata of ${key}`, formData[key]);
-    });
-    // // Send data to backend
+
+    // Send data to backend
     // fetch("/your-backend-endpoint", {
     //   method: "POST",
     //   body: data,
@@ -106,16 +118,16 @@ const MyAccount = () => {
             <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 px-5 md:px-0">
               <InputField
                 label="First Name"
-                name="firstName"
+                name="fName"
                 placeholder="Enter your first name"
-                value={formData.firstName}
+                value={formData.fName}
                 onChange={handleInputChange}
               />
               <InputField
                 label="Last Name"
-                name="lastName"
+                name="lName"
                 placeholder="Enter your last name"
-                value={formData.lastName}
+                value={formData.lName}
                 onChange={handleInputChange}
               />
               <InputField

@@ -1,4 +1,3 @@
-import Folder from "../Schemas/FolderSchema.js";
 import User from "../Schemas/UserSchema.js";
 import crypto from "crypto";
 import { sendEmailVerificationToken } from "../Utils/Middlewares/Verification.js";
@@ -367,6 +366,29 @@ export const singleUserDetails = async (req, res) => {
     res.status(501).json({
       success: false,
       message: "Internal Server Error",
+    });
+  }
+};
+
+// Get Logged In User Details
+export const loggedInUserDetails = async (req, res) => {
+  try {
+    const loggedInUser = await User.findById(req.user);
+    if (!loggedInUser) {
+      res.status(401).json({
+        success: false,
+        message: "Not Logged In",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        loggedInUser,
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: error.message,
     });
   }
 };
