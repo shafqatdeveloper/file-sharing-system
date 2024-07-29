@@ -56,6 +56,11 @@ const Companies = () => {
           </div>
         </div>
       </header>
+      <div>
+        <h1 className="text-2xl font-bold font-sans text-center pt-3 w-max border-b-2 border-b-black tracking-wide">
+          My Companies
+        </h1>
+      </div>
       <main className="flex-grow h-full w-full mx-auto py-6">
         <div className="shadow w-full h-full rounded-lg py-6 flex flex-col items-center px-5">
           <div className="w-full flex flex-col md:flex-row justify-between items-center mb-6">

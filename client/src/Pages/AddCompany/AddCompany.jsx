@@ -16,6 +16,14 @@ const AddCompany = () => {
   const [companyPic, setCompanyPic] = useState(null);
   const [companyType, setCompanyType] = useState("");
   const [loading, setLoading] = useState(false);
+  const [customCompanyType, setCustomCompanyType] = useState("");
+
+  const handleCompanyTypeChange = (e) => {
+    setCompanyType(e.target.value);
+    if (e.target.value !== "Other") {
+      setCustomCompanyType("");
+    }
+  };
 
   useEffect(() => {
     dispatch(checkAuth());
@@ -110,17 +118,37 @@ const AddCompany = () => {
             <select
               id="companyType"
               value={companyType}
-              onChange={(e) => setCompanyType(e.target.value)}
+              onChange={handleCompanyTypeChange}
               className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#67C22A] focus:border-transparent"
               required
             >
               <option value="" disabled>
                 Select Type
               </option>
-              <option value="Type1">Type 1</option>
-              <option value="Type2">Type 2</option>
-              <option value="Type3">Type 3</option>
+              <option value="Dealership">Dealership</option>
+              <option value="Homecare">Homecare</option>
+              <option value="Billing Service">Billing Service</option>
+              <option value="Real Estate">Real Estate</option>
+              <option value="Other">Other</option>
             </select>
+            {companyType === "Other" && (
+              <div className="mt-4">
+                <label
+                  htmlFor="customCompanyType"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Please specify other company Type
+                </label>
+                <input
+                  id="customCompanyType"
+                  type="text"
+                  value={customCompanyType}
+                  onChange={(e) => setCustomCompanyType(e.target.value)}
+                  className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#67C22A] focus:border-transparent"
+                  required
+                />
+              </div>
+            )}
           </div>
           <button
             type="submit"

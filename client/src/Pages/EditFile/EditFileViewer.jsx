@@ -269,7 +269,7 @@ const EditFileViewer = () => {
                   checked={shareOption === "sender"}
                   onChange={() => setShareOption("sender")}
                 />
-                Sender
+                Submit to Sender
               </label>
               <label className="flex items-center gap-1">
                 <input
@@ -279,7 +279,7 @@ const EditFileViewer = () => {
                   checked={shareOption === "other"}
                   onChange={() => setShareOption("other")}
                 />
-                Other
+                Type their Email
               </label>
             </div>
             {shareOption === "sender" ? (
