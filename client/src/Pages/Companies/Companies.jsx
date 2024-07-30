@@ -47,7 +47,21 @@ const Companies = () => {
   // Archive Company Handler
   const handleArchiveCompany = async (e, id) => {
     e.preventDefault();
-    alert("Archived");
+    try {
+      const response = await axios.put(`/api/company/archive/${id}`);
+      if (response.data.success) {
+        toast(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      fetchCompanies();
+    }
   };
 
   // Update Company Type

@@ -60,6 +60,39 @@ export const getUserCompanies = async (req, res) => {
 };
 
 // Archive a Company
+export const archiveCompany = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const company = await Company.findById(companyId);
+    if (!company) {
+      res.status(401).json({
+        success: false,
+        message: "Company Not Found",
+      });
+    } else {
+      if (company.archived) {
+        company.archived = false;
+        await company.save();
+        res.status(200).json({
+          success: true,
+          message: "Unarchived",
+        });
+      } else {
+        company.archived = true;
+        await company.save();
+        res.status(200).json({
+          success: true,
+          message: "Archived",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 // Change Company Type
 

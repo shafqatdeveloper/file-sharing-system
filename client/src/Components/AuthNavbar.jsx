@@ -107,7 +107,7 @@ const AuthNavbar = () => {
             />
           </button>
           {profileSectionOpen && (
-            <div className="absolute top-16 bg-white py-2 shadow-md shadow-black/50 rounded-md w-80 right-0">
+            <div className="absolute top-16 bg-white py-2 shadow-md shadow-black/50 z-10 rounded-md w-80 right-0">
               <div className="border-b border-b-gray-300 pb-1">
                 <div className="pl-3 flex flex-col gap-1 py-1">
                   <h1>
@@ -134,7 +134,7 @@ const AuthNavbar = () => {
                   </div>
                 </div>
               </div>
-              <div className="border-b border-b-gray-300 py-4 flex flex-col gap-1 text-primaryDark font-bold tracking-wide font-sans">
+              <div className="border-b border-b-gray-300 z-50 py-4 flex flex-col gap-1 text-primaryDark font-bold tracking-wide font-sans">
                 <div className="pl-3 flex flex-col gap-2">
                   <Link
                     onClick={toggleProfileSection}
@@ -148,7 +148,7 @@ const AuthNavbar = () => {
                   </Link>
                 </div>
               </div>
-              <div className="mt-2 w-full flex flex-col gap-1">
+              <div className="mt-2 w-full flex flex-col gap-1 z-20">
                 <Link
                   to={"/my/account"}
                   onClick={() => {

@@ -5,6 +5,7 @@ import {
 } from "../Utils/Middlewares/AuthMiddleware.js";
 import upload from "../Config/Multer.js";
 import {
+  archiveCompany,
   createCompany,
   getUserCompanies,
   updateCompanyType,
@@ -30,6 +31,14 @@ Router.put(
   isAuthenticatedUser,
   authorizeVerifiedUser(),
   updateCompanyType
+);
+
+// Archive Company
+Router.put(
+  "/company/archive/:companyId",
+  isAuthenticatedUser,
+  authorizeVerifiedUser(),
+  archiveCompany
 );
 
 export default Router;
