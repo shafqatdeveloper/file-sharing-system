@@ -58,3 +58,34 @@ export const getUserCompanies = async (req, res) => {
     });
   }
 };
+
+// Archive a Company
+
+// Change Company Type
+
+export const updateCompanyType = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const { updatedCompanyType } = req.body;
+    const company = await Company.findById(companyId);
+    if (!company) {
+      res.status(401).json({
+        success: false,
+        message: "Company Not Found",
+      });
+    } else {
+      company.companyType = updatedCompanyType;
+      await company.save();
+      console.log(companyId, updatedCompanyType);
+      res.status(200).json({
+        success: true,
+        message: "Company Type Updated",
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

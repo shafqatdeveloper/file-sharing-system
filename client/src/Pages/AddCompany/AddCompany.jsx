@@ -41,7 +41,10 @@ const AddCompany = () => {
     const form = new FormData();
     form.append("companyName", companyName);
     form.append("companyPic", companyPic);
-    form.append("companyType", companyType);
+    form.append(
+      "companyType",
+      companyType === "Other" ? customCompanyType : companyType
+    );
     try {
       const response = await axios.post("/api/company/add/new", form);
       if (response.data.success) {
@@ -61,6 +64,10 @@ const AddCompany = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCustomCompanyType = (e) => {
+    setCustomCompanyType(e.target.value);
   };
 
   return (
@@ -108,6 +115,15 @@ const AddCompany = () => {
               className="mt-1 block w-full text-gray-700 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#67C22A] focus:border-transparent"
             />
           </div>
+          {companyPic && (
+            <div className="w-full h-28">
+              <img
+                src={URL.createObjectURL(companyPic)}
+                alt="Company Picture"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
           <div>
             <label
               htmlFor="companyType"
@@ -143,7 +159,7 @@ const AddCompany = () => {
                   id="customCompanyType"
                   type="text"
                   value={customCompanyType}
-                  onChange={(e) => setCustomCompanyType(e.target.value)}
+                  onChange={handleCustomCompanyType}
                   className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#67C22A] focus:border-transparent"
                   required
                 />
