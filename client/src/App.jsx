@@ -15,6 +15,7 @@ import axios from "axios";
 import Loader from "./Components/Loaders/Loader";
 import { AiOutlineClose } from "react-icons/ai";
 import EditFileViewer from "./Pages/EditFile/EditFileViewer";
+import CreateTeam from "./Pages/CreateTeam/CreateTeam";
 
 const UnAuthenticatedHome = lazy(() =>
   import("../src/Pages/UnAuthenticatedHome/UnAuthenticatedHome")
@@ -142,6 +143,7 @@ function App() {
             element={<VerifyUserEmail />}
           />
           <Route path="/folder/add/:companyId" element={<AddFolder />} />
+          <Route path="/team/create/:teamLeaderId" element={<CreateTeam />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

@@ -3,6 +3,7 @@ import upload from "../Config/Multer.js"; // Importing the Multer configuration 
 import {
   addAdmin,
   changePassword,
+  inviteFriendToWebsite,
   isNotVerifiedUser,
   loggedInUser,
   loggedInUserDetails,
@@ -12,10 +13,12 @@ import {
   resendVerificationEmail,
   singleUserDetails,
   updateAdminInfo,
+  updateUserRole,
   verifyUserEmail,
 } from "../Controllers/UserController.js"; // Importing user-related controllers
 import {
   auhtorizeRoles,
+  authorizeVerifiedUser,
   isAuthenticatedUser,
 } from "../Utils/Middlewares/AuthMiddleware.js"; // Importing authentication and authorization middlewares
 
@@ -83,4 +86,19 @@ Router.get(
 
 Router.get("/user/me", isAuthenticatedUser, loggedInUserDetails);
 
+// Update User Role
+Router.put(
+  "/user/role/update/:userId",
+  isAuthenticatedUser,
+  authorizeVerifiedUser(),
+  updateUserRole
+);
+
+// Invite Friend
+Router.post(
+  "/friend/invite",
+  isAuthenticatedUser,
+  authorizeVerifiedUser(),
+  inviteFriendToWebsite
+);
 export default Router; // Exporting the router as the default export

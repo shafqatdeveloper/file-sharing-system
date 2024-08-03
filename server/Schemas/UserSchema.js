@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema({
       required: true,
     },
   ],
+  teams: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Team",
+    },
+  ],
   fax: { type: String, required: false },
   esignName: { type: String, required: false },
   esignInitials: { type: String, required: false },

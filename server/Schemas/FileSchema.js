@@ -26,6 +26,13 @@ const fileSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  accessors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  ],
   fields: [],
   uploadedOn: {
     type: Date,

@@ -227,7 +227,7 @@ const FileViewer = () => {
                       </Document>
                     </div>
                   </div>
-                  <div className="flex justify-center gap-5 py-5">
+                  {/* <div className="flex justify-center gap-5 py-5">
                     <button
                       className="p-2 rounded-full bg-gray-200"
                       onClick={() => setPageNumber(pageNumber - 1)}
@@ -242,7 +242,7 @@ const FileViewer = () => {
                     >
                       <AiOutlineArrowRight />
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               )
             )}

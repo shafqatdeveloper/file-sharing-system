@@ -5,7 +5,11 @@ import { checkAuth } from "../../Redux/Features/Auth/AuthSlice";
 import { toast } from "react-toastify";
 import { TiDocumentText } from "react-icons/ti";
 import axios from "axios";
-import { MdOutlinePersonOutline, MdPersonOutline } from "react-icons/md";
+import {
+  MdDeleteOutline,
+  MdOutlinePersonOutline,
+  MdPersonOutline,
+} from "react-icons/md";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Loader from "../../Components/Loaders/Loader";
 import Modal from "react-modal";
@@ -24,7 +28,9 @@ const SingleFolder = () => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [fileUploadTrigger, setFileUploadTrigger] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [addMemberModalOpen, setAddMemberModalOpen] = useState(false);
   const [shareEmail, setShareEmail] = useState("");
+  const [teamMemberEmail, setTeamMemberEmail] = useState("");
   const [shareOptions, setShareOptions] = useState({
     shareLink: true,
     shareFile: true,
@@ -35,7 +41,15 @@ const SingleFolder = () => {
   const [singleShareLoading, setSingleShareLoading] = useState(false);
   const [shared, setShared] = useState(false);
   const [selectedFileToShare, setSelectedFileToShare] = useState(null);
+  const [selectedTeamId, setSelectedTeamId] = useState(
+    loggedInUserInfo?.teams[0]?.teamName
+  );
+  const [expandedTeam, setExpandedTeam] = useState(null);
 
+  const toggleTeamExpansion = (teamName) => {
+    setExpandedTeam(expandedTeam === teamName ? null : teamName);
+  };
+  console.log("Selected Team ID", selectedTeamId);
   // Select a Single File
   const handleSelectFile = (fileId) => {
     setSelectedFiles((prevSelected) =>
@@ -44,6 +58,14 @@ const SingleFolder = () => {
         : [...prevSelected, fileId]
     );
   };
+
+  // Set Selected Team ID
+  useEffect(() => {
+    // Update selectedTeamId if loggedInUserInfo or teams change
+    if (loggedInUserInfo?.teams?.length > 0) {
+      setSelectedTeamId(loggedInUserInfo.teams[0]._id);
+    }
+  }, [loggedInUserInfo]);
 
   // Select all FIles
   const handleSelectAll = () => {
@@ -72,39 +94,40 @@ const SingleFolder = () => {
   const { folderId } = useParams();
 
   // Fetch LoggedIn User Folders
+  const fetchSingleFolder = async () => {
+    try {
+      const response = await axios.get(`/api/user/folder/single/${folderId}`);
+      setFolder(response.data.folder);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+  };
   useEffect(() => {
-    const fetchSingleFolder = async () => {
-      try {
-        const response = await axios.get(`/api/user/folder/single/${folderId}`);
-        setFolder(response.data.folder);
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message ||
-            "Something went wrong. Please try again."
-        );
-      }
-    };
     fetchSingleFolder();
     if (shared) {
       setShared(false);
     }
   }, [fileUploadTrigger, folderId, shared]);
 
+  console.log("Logged In User", loggedInUserInfo);
   // Fetch loggedIn User
+  const fetchUserInfo = async () => {
+    try {
+      const response = await axios.get(`/api/user/authenticate`, {
+        withCredentials: true,
+      });
+      setLoggedInUserInfo(response.data.loggedInUser);
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+  };
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      try {
-        const response = await axios.get(`/api/user/authenticate`, {
-          withCredentials: true,
-        });
-        setLoggedInUserInfo(response.data.loggedInUser);
-      } catch (error) {
-        toast.error(
-          error.response?.data?.message ||
-            "Something went wrong. Please try again."
-        );
-      }
-    };
     fetchUserInfo();
   }, []);
 
@@ -154,11 +177,22 @@ const SingleFolder = () => {
     setIsShareModalOpen(true);
   };
 
+  // Open Add Member Modal
+  const openAddMemberModal = () => {
+    setAddMemberModalOpen(true);
+  };
+
   // Close Share Modal
   const closeShareModal = () => {
     setIsShareModalOpen(false);
     setShareEmail("");
     setShareOptions({ shareLink: false, shareFile: true, editable: false });
+  };
+
+  // Close Add Member Modal
+
+  const closeAddMemberModal = () => {
+    setAddMemberModalOpen(false);
   };
 
   // Handle Share
@@ -228,6 +262,108 @@ const SingleFolder = () => {
     accept: "application/pdf",
   });
 
+  // Update Folder Type
+  const handleUpdateFolderType = async (e, folderId) => {
+    const updatedFolderType = e.target.value;
+    try {
+      const response = await axios.put(`/api/folder/type/update/${folderId}`, {
+        updatedFolderType,
+      });
+      if (response.data.success) {
+        toast(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      fetchSingleFolder();
+    }
+  };
+
+  console.log("Current Location", location.pathname);
+  // Update User Role
+
+  const updateUserRoleHandler = async (e, userId) => {
+    e.preventDefault();
+    const updatedUserRole = e.target.value;
+    try {
+      const response = await axios.put(`/api/user/role/update/${userId}`, {
+        updatedUserRole,
+      });
+      if (response.data.success) {
+        toast(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      fetchSingleFolder();
+      fetchUserInfo();
+    }
+  };
+
+  // Add Member to The TEAM
+  const handleAddMember = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.put(
+        `/api/member/add-to-team/${selectedTeamId}`,
+        {
+          teamMemberEmail,
+        }
+      );
+      if (response.data.success) {
+        toast(response.data.message);
+        closeAddMemberModal();
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+    }
+    fetchUserInfo();
+  };
+
+  // Delete Member from the TEAM
+
+  const handleDeleteMember = async (teamId, memberId) => {
+    const confirmRemoveMember = confirm("Are you sure to remove this member?");
+    if (confirmRemoveMember) {
+      try {
+        const response = await axios.put(
+          `/api/member/remove-from-team/${memberId}`,
+          {
+            teamId,
+          }
+        );
+        if (response.data.success) {
+          toast(response.data.message);
+        } else {
+          toast.error(response.data.message);
+        }
+      } catch (error) {
+        toast.error(
+          error.response?.data?.message ||
+            "Something went wrong. Please try again."
+        );
+      } finally {
+        fetchUserInfo();
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
@@ -237,28 +373,39 @@ const SingleFolder = () => {
             {folder && folder.folderType && (
               <div className="">
                 <select
-                  name="transaction-type"
-                  className="text-xs font-medium text-primaryDark outline-none focus:outline-none uppercase "
-                  id=""
+                  className="text-primaryDark font-medium outline-none focus:outline-none"
+                  name="companyType"
+                  onChange={(e) => handleUpdateFolderType(e, folder._id)}
+                  id="companyType"
                 >
-                  <option className="font-medium" value="">
-                    Select Transaction Type
+                  <option value={folder.folderType}>{folder.folderType}</option>
+                  <option
+                    className={folder.folderType === "Dealership" && "hidden"}
+                    value="Dealership"
+                  >
+                    Dealership
                   </option>
-                  <option className="font-medium" value="Home Care Agent">
-                    Home Care Agent
+                  <option
+                    className={folder.folderType === "Homecare" && "hidden"}
+                    value="Homecare"
+                  >
+                    Homecare
                   </option>
-                  <option className="font-medium" value="Real Estate">
+                  <option
+                    className={
+                      folder.folderType === "Billing Service" && "hidden"
+                    }
+                    value="Billing Service"
+                  >
+                    Billing Service
+                  </option>
+                  <option
+                    className={folder.folderType === "Real Estate" && "hidden"}
+                    value="Real Estate"
+                  >
                     Real Estate
                   </option>
-                  <option className="font-medium" value="Autos Agency">
-                    Autos Agency
-                  </option>
-                  <option className="font-medium" value="Billing Agency">
-                    Billing Agency
-                  </option>
-                  <option className="font-medium" value="Other">
-                    Other
-                  </option>
+                  <option value="Other">Other</option>
                 </select>
               </div>
             )}
@@ -307,7 +454,13 @@ const SingleFolder = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1  sm:grid-cols-2 gap-2">
-                <div className="">
+                <div
+                  className={
+                    documentUploader
+                      ? " w-full transition-all  duration-300"
+                      : "opacity-0 hidden transition-all border-b-[1px] pb-8 duration-300"
+                  }
+                >
                   <BrowseTemplate folderId={folderId} />
                 </div>
                 <div
@@ -460,60 +613,169 @@ const SingleFolder = () => {
                   of the negotiation! No one can see who you invite.
                 </p>
               </div>
-              <span>
-                <button className="w-full sm:inline-flex sm:w-max items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark">
-                  Add Person
-                </button>
-              </span>
+              <button
+                onClick={() => openAddMemberModal()}
+                className="w-full sm:inline-flex sm:w-max items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark"
+              >
+                Add Contact
+              </button>
             </div>
-            <div className="flex sm:items-center sm:justify-between flex-col sm:flex-row gap-2 sm:gap-0">
-              {/* Name */}
-              <div className="flex items-center gap-2">
-                <div className="bg-gray-400 w-8 h-8 text-white p-1 flex items-center justify-center rounded-full">
-                  <MdPersonOutline />
-                </div>
-                <h1>Shafqat Rasool</h1>
-                <h6>(you)</h6>
-              </div>
-              {/* Email */}
-              <div>
-                <h1 className="text-sm text-gray-400">
-                  {loggedInUserInfo?.email}
-                </h1>
-              </div>
-              {/* Role */}
-              <div>
-                <select
-                  name="user-role"
-                  className="text-xs font-medium text-primaryDark outline-none focus:outline-none uppercase "
-                  id=""
-                >
-                  <option className="font-medium" value="None">
-                    None
-                  </option>
-                  <option className="font-medium" value="Buying Agent">
-                    Buying Agent
-                  </option>
-                  <option className="font-medium" value="Listing Agent">
-                    Listing Agent
-                  </option>
-                  <option className="font-medium" value="Buyer">
-                    Buyer
-                  </option>
-                  <option className="font-medium" value="Seller">
-                    Seller
-                  </option>
-                  <option className="font-medium" value="Admin">
-                    Admin
-                  </option>
-                  <option className="font-medium" value="Apraisel">
-                    Apraisel
-                  </option>
-                  <option className="font-medium" value="Buyer's Attorney">
-                    Buyer's Attorney
-                  </option>
-                </select>
-              </div>
+            <div className="flex flex-col gap-3 rounded-md">
+              {loggedInUserInfo &&
+              loggedInUserInfo.teams &&
+              loggedInUserInfo.teams.length > 0 ? (
+                loggedInUserInfo.teams.map((team) => {
+                  const isExpanded = expandedTeam === team.teamName;
+                  return (
+                    <div key={team.teamName} className="flex flex-col gap-2">
+                      <button
+                        className="flex items-center justify-between p-3 bg-gray-200 rounded-md"
+                        onClick={() => toggleTeamExpansion(team.teamName)}
+                      >
+                        <h1>TL: {team.teamName}</h1>
+                        <span className="font-bold text-xl">
+                          {isExpanded ? "-" : "+"}
+                        </span>
+                      </button>
+                      {isExpanded && (
+                        <div className="flex flex-col gap-2">
+                          {team.teamMembers.map((member) => {
+                            const memberName = `${member.fName} ${member.lName}`;
+                            return (
+                              <div
+                                key={member._id}
+                                className="flex sm:items-center sm:justify-between flex-col sm:flex-row gap-2 sm:gap-0"
+                              >
+                                {/* Name */}
+                                <div className="flex items-center gap-2">
+                                  <div className="bg-gray-400 w-8 h-8 text-white p-1 flex items-center justify-center rounded-full">
+                                    <MdPersonOutline />
+                                  </div>
+                                  <h1>{memberName}</h1>
+                                  <h6
+                                    className={
+                                      member._id === loggedInUserInfo._id
+                                        ? "block"
+                                        : "hidden"
+                                    }
+                                  >
+                                    (you)
+                                  </h6>
+                                </div>
+                                {loggedInUserInfo._id === team.teamLeader && (
+                                  <div
+                                    className={
+                                      loggedInUserInfo?._id === member._id &&
+                                      "opacity-0"
+                                    }
+                                  >
+                                    <button
+                                      onClick={(e) =>
+                                        handleDeleteMember(team._id, member._id)
+                                      }
+                                      className="bg-red-600 text-white rounded-full p-1"
+                                    >
+                                      <MdDeleteOutline size={20} />
+                                    </button>
+                                  </div>
+                                )}
+                                {/* Email */}
+                                <div>
+                                  <h1 className="text-sm text-gray-400">
+                                    {member.email}
+                                  </h1>
+                                </div>
+                                {/* Role */}
+                                <div>
+                                  <select
+                                    name="user-role"
+                                    onChange={(e) =>
+                                      updateUserRoleHandler(e, member._id)
+                                    }
+                                    className="text-xs font-medium text-primaryDark outline-none focus:outline-none uppercase"
+                                    id=""
+                                  >
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole === "None" && "hidden"
+                                      }`}
+                                      value={member.userRole}
+                                    >
+                                      {member.userRole}
+                                    </option>
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole === "Buying Agent" &&
+                                        "hidden"
+                                      }`}
+                                      value="Buying Agent"
+                                    >
+                                      Buying Agent
+                                    </option>
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole === "Listing Agent" &&
+                                        "hidden"
+                                      }`}
+                                      value="Listing Agent"
+                                    >
+                                      Listing Agent
+                                    </option>
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole === "Buyer" && "hidden"
+                                      }`}
+                                      value="Buyer"
+                                    >
+                                      Buyer
+                                    </option>
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole === "Seller" && "hidden"
+                                      }`}
+                                      value="Seller"
+                                    >
+                                      Seller
+                                    </option>
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole === "Admin" && "hidden"
+                                      }`}
+                                      value="Admin"
+                                    >
+                                      Admin
+                                    </option>
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole === "Apraisel" &&
+                                        "hidden"
+                                      }`}
+                                      value="Apraisel"
+                                    >
+                                      Apraisel
+                                    </option>
+                                    <option
+                                      className={`font-medium ${
+                                        member.userRole ===
+                                          "Buyer's Attorney" && "hidden"
+                                      }`}
+                                      value="Buyer's Attorney"
+                                    >
+                                      Buyer's Attorney
+                                    </option>
+                                  </select>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              ) : (
+                <p>No teams available.</p>
+              )}
             </div>
           </div>
         </div>
@@ -615,6 +877,65 @@ const SingleFolder = () => {
               className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark"
             >
               Share
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Add Member Modal */}
+      <Modal
+        isOpen={addMemberModalOpen}
+        onRequestClose={closeAddMemberModal}
+        contentLabel="Share File Modal"
+        className="Modal w-3/5 sm:h-2/4 rounded-md shadow-md shadow-black/30 flex flex-col gap-5 h-max justify-center"
+        ariaHideApp={false}
+        overlayClassName="Overlay"
+      >
+        <h1 className="text-center font-bold py-2">Add Member</h1>
+        <select
+          onChange={(e) => setSelectedTeamId(e.target.value)}
+          name=""
+          className="w-2/3 place-self-center border border-primaryDark rounded-md p-0.5"
+          id=""
+        >
+          {loggedInUserInfo &&
+            loggedInUserInfo.teams &&
+            loggedInUserInfo.teams.length > 0 &&
+            loggedInUserInfo.teams.map((team) => {
+              return (
+                <option className="flex flex-col" value={team._id}>
+                  {team.teamName} Team
+                </option>
+              );
+            })}
+        </select>
+        <form onSubmit={handleAddMember}>
+          <div className="mb-4 w-full flex items-center flex-col gap-1 justify-center">
+            <label htmlFor="memberEmail">Member Email</label>
+            <div className="border-2 w-3/5 border-primaryDark rounded-md">
+              <input
+                type="email"
+                value={teamMemberEmail}
+                required
+                placeholder="Enter Member's Email here"
+                onChange={(e) => setTeamMemberEmail(e.target.value)}
+                className="w-full p-2 outline-none focus:outline-none rounded-md"
+              />
+            </div>
+          </div>
+          <div className="flex justify-center gap-5 pt-5">
+            <button
+              type="button"
+              onClick={closeAddMemberModal}
+              className="px-4 py-2 mr-2 border border-transparent text-sm font-medium rounded-md text-gray-100 w-24 bg-red-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 border border-transparent text-sm w-24 font-medium rounded-md text-white bg-primaryDark"
+            >
+              Add
             </button>
           </div>
         </form>

@@ -8,11 +8,13 @@ import { HiFolderAdd } from "react-icons/hi";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import Modal from "react-modal";
 
 const Companies = () => {
   const api_Url = import.meta.env.VITE_API_URL;
   const [userCompanies, setUserCompanies] = useState(null);
-  const [companyType, setCompanyType] = useState(null);
+  const [isInviteFrindModalOpen, setisInviteFrindModalOpen] = useState(false);
+  const [friendEmail, setFriendEmail] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -89,14 +91,54 @@ const Companies = () => {
     }
   };
 
+  const openInviteFriendModal = () => {
+    setisInviteFrindModalOpen(true);
+  };
+
+  // Close Share Modal
+  const closeInviteFriendModal = () => {
+    setisInviteFrindModalOpen(false);
+  };
+
+  // Handle Invite Friend
+  const handleInviteFriend = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(`/api/friend/invite`, {
+        friendEmail,
+      });
+      if (response.data.success) {
+        toast(response.data.message);
+        closeInviteFriendModal();
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
       <header className="w-full shadow">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-10 flex justify-between items-center">
           <div className="text-2xl font-bold">Default Profile</div>
-          <div>
-            <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full text-white bg-primaryDark">
-              <Link to={"/company/add"}>+ Add a Company</Link>
+          <div className="flex items-center gap-3">
+            <Link
+              to={"/company/add"}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full text-white bg-primaryDark"
+            >
+              <>+ Add a Company</>
+            </Link>
+            <button
+              onClick={openInviteFriendModal}
+              className="inline-flex items-center px-4 py-2 border border-transparent font-medium rounded-full text-black bg-[#f3cb29]"
+            >
+              Invite Friend
             </button>
           </div>
         </div>
@@ -158,6 +200,16 @@ const Companies = () => {
                       >
                         {company.companyName}
                       </Link>
+                      <div>
+                        <h1>
+                          <strong className="text-gray-600">Admin:</strong>{" "}
+                          <span>
+                            {company.companyAdmin.fName +
+                              " " +
+                              company.companyAdmin.lName}
+                          </span>
+                        </h1>
+                      </div>
                       <div className="text-gray-600 flex items-center gap-2">
                         <strong>Type: </strong>
                         <select
@@ -246,6 +298,47 @@ const Companies = () => {
             </div>
           )}
         </div>
+
+        <Modal
+          isOpen={isInviteFrindModalOpen}
+          onRequestClose={closeInviteFriendModal}
+          contentLabel="Share File Modal"
+          className="Modal w-3/5 sm:h-2/4 rounded-md shadow-md shadow-black/30 flex flex-col gap-5 h-max justify-center"
+          ariaHideApp={false}
+          overlayClassName="Overlay"
+        >
+          <h1 className="text-center font-bold py-2">Invite a Friend</h1>
+          <form onSubmit={handleInviteFriend}>
+            <div className="mb-4 w-full flex items-center flex-col gap-1 justify-center">
+              <label htmlFor="memberEmail">Enter you Friend's Email</label>
+              <div className="border-2 w-3/5 border-primaryDark rounded-md">
+                <input
+                  type="email"
+                  value={friendEmail}
+                  required
+                  placeholder="Enter Member's Email here"
+                  onChange={(e) => setFriendEmail(e.target.value)}
+                  className="w-full p-2 outline-none focus:outline-none rounded-md"
+                />
+              </div>
+            </div>
+            <div className="flex justify-center gap-5 pt-5">
+              <button
+                type="button"
+                onClick={closeInviteFriendModal}
+                className="px-4 py-2 mr-2 border border-transparent text-sm font-medium rounded-md text-gray-100 w-24 bg-red-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 border border-transparent text-sm w-24 font-medium rounded-md text-white bg-primaryDark"
+              >
+                Invite
+              </button>
+            </div>
+          </form>
+        </Modal>
       </main>
     </div>
   );

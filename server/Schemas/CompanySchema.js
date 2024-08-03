@@ -7,7 +7,7 @@ const companySchema = new mongoose.Schema({
   },
   companyAdmin: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
     required: true,
   },
   folders: [
@@ -25,6 +25,13 @@ const companySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  accessors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  ],
   archived: { type: Boolean, default: false },
   createdAt: {
     type: Date,

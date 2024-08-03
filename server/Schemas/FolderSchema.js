@@ -25,11 +25,22 @@ const folderSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  archived: {
+    type: Boolean,
+    default: false,
+  },
   parentCompany: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "company",
     required: true,
   },
+  accessors: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now(),

@@ -1,6 +1,8 @@
 import User from "../Schemas/UserSchema.js";
 import crypto from "crypto";
 import { sendEmailVerificationToken } from "../Utils/Middlewares/Verification.js";
+import Team from "../Schemas/TeamSchema.js";
+import { sendInvitationEmail } from "../Utils/InviteFriend/InviteFriendEmail.js";
 
 // Register a User
 const generateVerficationToken = () => {
@@ -46,7 +48,16 @@ export const registerUser = async (req, res) => {
           password,
           verificationToken,
         });
+        const teamName = `${fName + lName}`;
+        const team = await Team.create({
+          teamName: teamName,
+          teamLeader: NewUser._id,
+        });
+        NewUser.teams.push(team._id);
+        await NewUser.save();
         const token = NewUser.JWTTOKEN();
+        team.teamMembers.push(NewUser._id);
+        await team.save();
         const options = { email, verificationToken };
         await sendEmailVerificationToken(options);
         res
@@ -202,7 +213,14 @@ export const loginUser = async (req, res) => {
 
 export const loggedInUser = async (req, res) => {
   try {
-    const loggedInUser = await User.findById(req.user);
+    const loggedInUser = await User.findById(req.user).populate({
+      path: "teams",
+      populate: {
+        path: "teamMembers",
+        model: "User",
+      },
+    });
+    console.log(loggedInUser);
     if (!loggedInUser) {
       res.status(402).json({
         success: false,
@@ -373,7 +391,7 @@ export const singleUserDetails = async (req, res) => {
 // Get Logged In User Details
 export const loggedInUserDetails = async (req, res) => {
   try {
-    const loggedInUser = await User.findById(req.user);
+    const loggedInUser = await User.findById(req.user).populate("team");
     if (!loggedInUser) {
       res.status(401).json({
         success: false,
@@ -389,6 +407,67 @@ export const loggedInUserDetails = async (req, res) => {
     res.status(501).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+// Update User Role
+export const updateUserRole = async (req, res) => {
+  const { updatedUserRole } = req.body;
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: `Not found`,
+      });
+    } else {
+      user.userRole = updatedUserRole;
+      await user.save();
+      res.status(200).json({
+        success: true,
+        message: "User Role Updated",
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+// Invite Friend to Join Software
+
+export const inviteFriendToWebsite = async (req, res) => {
+  try {
+    const { friendEmail } = req.body;
+    const isUserMember = await User.findOne({ email: friendEmail });
+    const loggedInUser = await User.findById(req.user);
+    const baseUrl = `https://absfhc.com`;
+    if (isUserMember) {
+      res.status(401).json({
+        success: false,
+        message: "User is already registered on Software",
+      });
+    } else {
+      const senderName = loggedInUser.fName + " " + loggedInUser.lName;
+      const options = {
+        senderName,
+        email: friendEmail,
+        baseUrl,
+      };
+      await sendInvitationEmail(options);
+      res.status(200).json({
+        success: true,
+        message: "Invitation Link Sent!",
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
     });
   }
 };

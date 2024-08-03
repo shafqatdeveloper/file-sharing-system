@@ -12,11 +12,9 @@ import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 const Folders = () => {
   const api_Url = import.meta.env.VITE_API_URL;
   const [userFolders, setUserFolders] = useState(null);
-  console.log("USers Folders", userFolders);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { companyId } = useParams();
-  console.log("Company Id", companyId);
   const { isAuthenticated } = useSelector((state) => state.auth);
   useEffect(() => {
     dispatch(checkAuth());
@@ -30,22 +28,64 @@ const Folders = () => {
 
   // Fetch Folders of Current Company
 
+  const fetchFolders = async () => {
+    try {
+      const response = await axios.get(`/api/company/folders/${companyId}`, {
+        withCredentials: true,
+      });
+      setUserFolders(response.data.folders);
+    } catch (error) {
+      toast(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    }
+  };
   useEffect(() => {
-    const fetchFolders = async () => {
-      try {
-        const response = await axios.get(`/api/company/folders/${companyId}`, {
-          withCredentials: true,
-        });
-        setUserFolders(response.data.folders);
-      } catch (error) {
-        toast(
-          error.response?.data?.message ||
-            "Something went wrong. Please try again."
-        );
-      }
-    };
     fetchFolders();
   }, []);
+
+  // Update Folder Type
+
+  const handleUpdateFolderType = async (e, folderId) => {
+    const updatedFolderType = e.target.value;
+    try {
+      const response = await axios.put(`/api/folder/type/update/${folderId}`, {
+        updatedFolderType,
+      });
+      if (response.data.success) {
+        toast(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      fetchFolders();
+    }
+  };
+  // Archive Folder
+
+  const handleArchiveFolder = async (e, folderId) => {
+    try {
+      const response = await axios.put(`/api/folder/archive/${folderId}`);
+      if (response.data.success) {
+        toast(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      fetchFolders();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center">
@@ -85,8 +125,13 @@ const Folders = () => {
                 return (
                   <div
                     key={index}
-                    className="bg-white w-full shadow-lg shadow-black/10 rounded-lg overflow-hidden mb-5"
+                    className="bg-white relative w-full shadow-lg shadow-black/10 rounded-lg overflow-hidden mb-5"
                   >
+                    {folder.archived && (
+                      <div className="absolute top-0 left-0 bg-black/70 text-white py-1 px-2 rounded-br-lg">
+                        <h1>Archived</h1>
+                      </div>
+                    )}
                     <div className="w-full h-36">
                       <Link
                         className="w-full h-full"
@@ -108,9 +153,54 @@ const Folders = () => {
                       </Link>
                       <div className="text-gray-600 flex items-center gap-2">
                         <strong>Type: </strong>
-                        <span className="text-primaryDark flex items-center gap-1 cursor-pointer">
-                          None <MdOutlineKeyboardArrowDown size={23} />
-                        </span>
+                        <div className="text-gray-600 flex items-center gap-2">
+                          <select
+                            className="text-primaryDark font-medium outline-none focus:outline-none"
+                            name="companyType"
+                            onChange={(e) =>
+                              handleUpdateFolderType(e, folder._id)
+                            }
+                            id="companyType"
+                          >
+                            <option value={folder.folderType}>
+                              {folder.folderType}
+                            </option>
+                            <option
+                              className={
+                                folder.folderType === "Dealership" && "hidden"
+                              }
+                              value="Dealership"
+                            >
+                              Dealership
+                            </option>
+                            <option
+                              className={
+                                folder.folderType === "Homecare" && "hidden"
+                              }
+                              value="Homecare"
+                            >
+                              Homecare
+                            </option>
+                            <option
+                              className={
+                                folder.folderType === "Billing Service" &&
+                                "hidden"
+                              }
+                              value="Billing Service"
+                            >
+                              Billing Service
+                            </option>
+                            <option
+                              className={
+                                folder.folderType === "Real Estate" && "hidden"
+                              }
+                              value="Real Estate"
+                            >
+                              Real Estate
+                            </option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
                       </div>
                       <div className="text-gray-600">
                         <strong>Created:</strong>{" "}
@@ -118,8 +208,11 @@ const Folders = () => {
                         {/* {new Date(folder.createdAt).toLocaleTimeString()} */}
                       </div>
                       <div className="mt-2">
-                        <button className="text-primaryDark hover:underline">
-                          Archive
+                        <button
+                          onClick={(e) => handleArchiveFolder(e, folder._id)}
+                          className="text-primaryDark hover:underline"
+                        >
+                          {folder.archived ? "Unarchive" : "Archive"}
                         </button>
                       </div>
                     </div>

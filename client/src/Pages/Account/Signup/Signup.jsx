@@ -51,7 +51,7 @@ const SignUp = () => {
         password,
       });
       if (response.data.success) {
-        navigate("/folders?user=authenticated");
+        navigate("/home?user=authenticated");
         toast(response.data.message);
       } else {
         toast(response.data.message);

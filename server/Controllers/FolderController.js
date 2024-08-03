@@ -21,7 +21,9 @@ export const createFolder = async (req, res) => {
         folderPic: folderPic.filename,
         parentCompany: companyId,
       });
+      createdFolder.accessors.push(req.user);
       parentCompany.folders.push(createdFolder._id);
+      await createdFolder.save();
       await parentCompany.save();
       res.status(200).json({
         success: true,
@@ -63,6 +65,69 @@ export const getSingleFolder = async (req, res) => {
       success: true,
       folder,
     });
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error ${error.message}`,
+    });
+  }
+};
+
+// Update Folder Type
+export const updateFolderType = async (req, res) => {
+  try {
+    const { folderId } = req.params;
+    console.log(folderId);
+    const { updatedFolderType } = req.body;
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      res.status(401).json({
+        success: false,
+        message: `Folder not Found`,
+      });
+    } else {
+      folder.folderType = updatedFolderType;
+      await folder.save();
+      res.status(200).json({
+        success: true,
+        message: "Folder Type Updated",
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error ${error.message}`,
+    });
+  }
+};
+
+// Archive Folder
+export const archiveFolder = async (req, res) => {
+  try {
+    const { folderId } = req.params;
+    const folder = await Folder.findById(folderId);
+    if (!folder) {
+      res.status(401).json({
+        success: false,
+        message: `Folder not Found`,
+      });
+    } else {
+      if (folder.archived) {
+        folder.archived = false;
+        await folder.save();
+        res.status(200).json({
+          success: true,
+          message: "Folder Unarchived",
+        });
+      } else {
+        folder.archived = true;
+        await folder.save();
+        res.status(200).json({
+          success: true,
+          message: "Folder Archived",
+        });
+      }
+    }
   } catch (error) {
     res.status(501).json({
       success: false,
