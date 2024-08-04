@@ -4,10 +4,11 @@ import axios from "axios";
 import { MdOutlineKeyboardArrowLeft } from "react-icons/md";
 import SuspenseLoader from "../../Components/Loaders/SuspenseLoader";
 import { Document, Page } from "react-pdf";
-import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
 import { useReactToPrint } from "react-to-print";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
 import "react-pdf/dist/esm/Page/TextLayer.css";
+import { toast } from "react-toastify";
+import Loader from "../../Components/Loaders/Loader";
 
 const FileViewer = () => {
   const { fileId } = useParams();
@@ -21,8 +22,16 @@ const FileViewer = () => {
   const pdfViewerRef = useRef(null);
   const printRef = useRef();
   const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
   const [pageWidth, setPageWidth] = useState(800);
+  const [shareLoading, setShareLoading] = useState(false);
+  const [shareEmail, setShareEmail] = useState("");
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shared, setShared] = useState(false);
+  const [shareOptions, setShareOptions] = useState({
+    shareLink: true,
+    shareFile: true,
+    editable: false,
+  });
 
   useEffect(() => {
     const handleResize = () => {
@@ -94,9 +103,64 @@ const FileViewer = () => {
 
   const handlePrint = useReactToPrint({
     content: () => printRef.current,
-    documentTitle: "",
-    pageStyle: () => "@page { size: auto; margin: 10mm; }",
+    documentTitle: pdfFileDetails?.Name || "document",
+    pageStyle: `
+      @page {
+        size: auto;
+        margin: 0mm;
+      }
+      @media print {
+        body {
+          -webkit-print-color-adjust: exact;
+        }
+        .page-break {
+          margin-top: 1rem;
+          display: block;
+          page-break-before: auto;
+        }
+      }
+    `,
+    removeAfterPrint: true,
   });
+
+  // Handle Share
+  const handleFileShare = async (e) => {
+    e.preventDefault();
+    closeShareModal();
+    setShareLoading(true);
+    try {
+      const response = await axios.post(`/api/file/share/single`, {
+        sharingFile: fileId,
+        email: shareEmail,
+        shareSetting: shareOptions,
+      });
+      if (response.data.success) {
+        toast(response.data.message);
+        setShared(true);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+    } finally {
+      setShareLoading(false);
+    }
+  };
+
+  // Open Share Modal
+  const openShareModal = () => {
+    setIsShareModalOpen(true);
+  };
+
+  // Close Share Modal
+  const closeShareModal = () => {
+    setIsShareModalOpen(false);
+    setShareEmail("");
+    setShareOptions({ shareLink: false, shareFile: true, editable: false });
+  };
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center gap-4 mt-5 px-1">
@@ -186,8 +250,15 @@ const FileViewer = () => {
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
               Save
             </button>
-            <button className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-              Share
+            <button
+              onClick={openShareModal}
+              className={
+                shareLoading
+                  ? "bg-transparent w-24 h-10 rounded border-2 border-primaryDark flex items-center justify-center"
+                  : "bg-green-500 w-24 hover:bg-green-700 text-white font-bold h-10 rounded"
+              }
+            >
+              {shareLoading ? <Loader /> : " Share"}
             </button>
           </div>
         </div>
@@ -227,27 +298,107 @@ const FileViewer = () => {
                       </Document>
                     </div>
                   </div>
-                  {/* <div className="flex justify-center gap-5 py-5">
-                    <button
-                      className="p-2 rounded-full bg-gray-200"
-                      onClick={() => setPageNumber(pageNumber - 1)}
-                      disabled={pageNumber === 1}
-                    >
-                      <AiOutlineArrowLeft />
-                    </button>
-                    <button
-                      className="p-2 rounded-full bg-gray-200"
-                      onClick={() => setPageNumber(pageNumber + 1)}
-                      disabled={pageNumber === numPages}
-                    >
-                      <AiOutlineArrowRight />
-                    </button>
-                  </div> */}
                 </div>
               )
             )}
           </div>
         </div>
+        {isShareModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
+            <div className="bg-white w-4/5 sm:h-3/5 rounded-md shadow-md flex flex-col h-max justify-center p-6">
+              <h2 className="text-xl font-bold mb-4">Share File</h2>
+              <form onSubmit={handleFileShare} className="w-full z-20">
+                <div className="mb-4 w-full">
+                  <label
+                    htmlFor="shareEmail"
+                    className="block mb-2 text-sm font-medium"
+                  >
+                    Recipient Email
+                  </label>
+                  <input
+                    type="email"
+                    id="shareEmail"
+                    value={shareEmail}
+                    onChange={(e) => setShareEmail(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block mb-2 text-sm font-medium">
+                    Share Settings
+                  </label>
+                  <div className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id="shareLink"
+                      checked={shareOptions.shareLink}
+                      onChange={(e) =>
+                        setShareOptions({
+                          ...shareOptions,
+                          shareLink: e.target.checked,
+                        })
+                      }
+                      className="mr-2"
+                    />
+                    <label htmlFor="shareLink" className="text-sm">
+                      Share Link
+                    </label>
+                  </div>
+                  <div className="flex items-center mb-2">
+                    <input
+                      type="checkbox"
+                      id="shareFile"
+                      checked={shareOptions.shareFile}
+                      onChange={(e) =>
+                        setShareOptions({
+                          ...shareOptions,
+                          shareFile: e.target.checked,
+                        })
+                      }
+                      className="mr-2"
+                    />
+                    <label htmlFor="shareFile" className="text-sm">
+                      Share File
+                    </label>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id="editable"
+                      checked={shareOptions.editable}
+                      onChange={(e) =>
+                        setShareOptions({
+                          ...shareOptions,
+                          editable: e.target.checked,
+                        })
+                      }
+                      className="mr-2"
+                    />
+                    <label htmlFor="editable" className="text-sm">
+                      Editable
+                    </label>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={closeShareModal}
+                    className="px-4 py-2 mr-2 border border-transparent text-sm font-medium rounded-md text-gray-600 bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primaryDark"
+                  >
+                    Share
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

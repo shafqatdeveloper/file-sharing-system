@@ -6,11 +6,13 @@ import { toast } from "react-toastify";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "../../../Redux/Features/Auth/AuthSlice";
+import { BiSolidHide, BiSolidShow } from "react-icons/bi";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -61,7 +63,7 @@ const Login = () => {
         </div>
         <form onSubmit={handleLogin} className="mt-8 space-y-6">
           <div className="rounded-md shadow-sm">
-            <div className="mb-4">
+            <div className="mb-4 flex items-center  border border-primaryDark placeholder-gray-500 text-gray-900 px-2 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
               <label htmlFor="email-address" className="sr-only">
                 Email address
               </label>
@@ -72,24 +74,37 @@ const Login = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900  focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-3 outline-none focus:outline-none bg-transparent sm:text-sm"
                 placeholder="Email address"
               />
             </div>
-            <div className="mb-4">
+            <div className="mb-4 flex items-center  border border-primaryDark placeholder-gray-500 text-gray-900 px-2 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
               <label htmlFor="password" className="sr-only">
                 Password
               </label>
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-3 outline-none focus:outline-none bg-transparent sm:text-sm"
                 placeholder="Password"
               />
+              {showPassword ? (
+                <BiSolidHide
+                  onClick={() => setShowPassword(false)}
+                  className="cursor-pointer text-primaryDark"
+                  size={22}
+                />
+              ) : (
+                <BiSolidShow
+                  onClick={() => setShowPassword(true)}
+                  className="cursor-pointer text-primaryDark"
+                  size={22}
+                />
+              )}
             </div>
           </div>
 

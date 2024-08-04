@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import ButtonLoader from "../../../Components/Loaders/ButtonLoader";
 import { useDispatch, useSelector } from "react-redux";
 import { checkAuth } from "../../../Redux/Features/Auth/AuthSlice";
+import { BiSolidHide, BiSolidShow } from "react-icons/bi";
 
 const SignUp = () => {
   const [fName, setFName] = useState("");
@@ -17,6 +18,7 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [termsAccepted, setTermsAccepted] = useState(false);
   const dispatch = useDispatch();
@@ -157,20 +159,33 @@ const SignUp = () => {
                 />
               </div>
             </div>
-            <div className="mb-4">
-              <label htmlFor="password" className="sr-only">
-                Create your password
-              </label>
+            <label htmlFor="password" className="sr-only">
+              Create your password
+            </label>
+            <div className="mb-4 w-full flex items-center rounded-md border px-3 border-primaryDark  text-gray-900  focus:outline-none focus:z-10">
               <input
                 id="password"
                 name="password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="appearance-none rounded-md relative block w-full p-3 border border-primaryDark placeholder-gray-500 text-gray-900  focus:outline-none focus:z-10 sm:text-sm"
+                className="appearance-none rounded-md relative block py-3 outline-none placeholder-gray-500 focus:outline-none  sm:text-sm w-full"
                 placeholder="Password"
               />
+              {showPassword ? (
+                <BiSolidHide
+                  onClick={() => setShowPassword(false)}
+                  className="cursor-pointer text-primaryDark"
+                  size={22}
+                />
+              ) : (
+                <BiSolidShow
+                  onClick={() => setShowPassword(true)}
+                  className="cursor-pointer text-primaryDark"
+                  size={22}
+                />
+              )}
             </div>
             <div className="mb-4">
               <label htmlFor="companyName" className="sr-only">

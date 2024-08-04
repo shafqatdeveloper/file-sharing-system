@@ -15,9 +15,9 @@ import { IoIosLogOut } from "react-icons/io";
 const AuthNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  console.log("location", location.pathname);
   const [isOpen, setIsOpen] = useState(false);
   const [profileSectionOpen, setProfileSectionOpen] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState();
   const [mobileProfileSectionOpen, setMobileProfileSectionOpen] =
     useState(false);
   const dispatch = useDispatch();
@@ -63,6 +63,17 @@ const AuthNavbar = () => {
     { name: "tasks", navLink: "/tasks", icon: <RiTaskLine size={22} /> },
     { name: "people", navLink: "/people", icon: <GoPeople size={22} /> },
   ];
+
+  useEffect(() => {
+    fetch("/api/user/me")
+      .then((response) => response.json())
+      .then((data) => {
+        setLoggedInUser(data.loggedInUser);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  }, [dispatch]);
 
   return (
     <header className="bg-white mb-0.5 py-5 shadow-md flex gap-12 justify-between px-5 sm:px-10 items-center">
@@ -111,10 +122,14 @@ const AuthNavbar = () => {
               <div className="border-b border-b-gray-300 pb-1">
                 <div className="pl-3 flex flex-col gap-1 py-1">
                   <h1>
-                    Member ID : <span className="font-medium">1234567</span>
+                    <span className="text-sm font-medium">Member ID :</span>
+                    <span className="font-medium"> {loggedInUser?._id}</span>
                   </h1>
                   <h1>
-                    Name : <span className="font-medium">Shadow Nix</span>
+                    Name :{" "}
+                    <span className="font-medium text-lg">
+                      {loggedInUser?.fName} {loggedInUser?.lName}
+                    </span>
                   </h1>
                 </div>
               </div>

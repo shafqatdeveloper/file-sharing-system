@@ -30,11 +30,18 @@ const userSchema = new mongoose.Schema({
   jobTitle: { type: String, required: false },
   tagline: { type: String, required: false },
   photo: { type: String, required: false },
+  address: { type: String, required: false },
+  country: { type: String, required: false },
+  timezone: { type: String, required: false },
+  city: { type: String, required: false },
+  stateProvince: { type: String, required: false },
+  zipPostalCode: { type: String, required: false },
   verificationToken: { type: String },
   verifiedUser: {
     type: Boolean,
     default: false,
   },
+  resetPasswordOTP: String,
 });
 
 // Hashing Password

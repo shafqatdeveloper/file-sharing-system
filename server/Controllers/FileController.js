@@ -160,14 +160,12 @@ export const shareSingleFile = async (req, res) => {
         message: "File not Found",
       });
     }
-    const folder = await Folder.findById(folderId);
     const loggedInUser = await User.findById(req.user);
     const isReceiverMember = await User.findOne({ email });
     const options = {
       email,
       sender: loggedInUser.fName,
       recevierMember: isReceiverMember ? true : false,
-      folderName: folder.folderName,
       editable: shareSetting.editable,
       linkOnly: shareSetting.shareLink,
       fileOnly: shareSetting.shareFile,

@@ -3,16 +3,20 @@ import upload from "../Config/Multer.js"; // Importing the Multer configuration 
 import {
   addAdmin,
   changePassword,
+  ForgotPassword,
   inviteFriendToWebsite,
   isNotVerifiedUser,
   loggedInUser,
   loggedInUserDetails,
   loginUser,
   logout,
+  myDetails,
   registerUser,
   resendVerificationEmail,
+  resetPassword,
   singleUserDetails,
   updateAdminInfo,
+  updateMyDetails,
   updateUserRole,
   verifyUserEmail,
 } from "../Controllers/UserController.js"; // Importing user-related controllers
@@ -84,7 +88,7 @@ Router.get(
 
 // Route for getting details of a Logged In user, requires authentication
 
-Router.get("/user/me", isAuthenticatedUser, loggedInUserDetails);
+Router.get("/user/me", isAuthenticatedUser, myDetails);
 
 // Update User Role
 Router.put(
@@ -101,4 +105,14 @@ Router.post(
   authorizeVerifiedUser(),
   inviteFriendToWebsite
 );
+
+// Forgot Password
+Router.post("/user/forgot-password", ForgotPassword);
+
+// Reset Password
+Router.put("/user/reset-password", resetPassword);
+
+// Update User Detials
+Router.put("/user/update", isAuthenticatedUser, updateMyDetails);
+
 export default Router; // Exporting the router as the default export

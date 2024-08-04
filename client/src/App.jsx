@@ -38,6 +38,9 @@ const MyAccount = lazy(() => import("../src/Pages/Account/Profile/Profile"));
 const BrowseTemplates = lazy(() =>
   import("../src/Pages/Templates/AllTemplates")
 );
+const ForgotPassword = lazy(() =>
+  import("../src/Pages/Account/ResetPassword/ResetPassword")
+);
 
 function App() {
   pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -144,6 +147,7 @@ function App() {
           />
           <Route path="/folder/add/:companyId" element={<AddFolder />} />
           <Route path="/team/create/:teamLeaderId" element={<CreateTeam />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

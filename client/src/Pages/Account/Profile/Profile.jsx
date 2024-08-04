@@ -1,14 +1,15 @@
+import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
+import { toast } from "react-toastify";
+import Loader from "../../../Components/Loaders/Loader";
 
 const MyAccount = () => {
   const [formData, setFormData] = useState({
     fName: "",
     lName: "",
-    email: "",
     username: "",
     phoneNumber: "",
-    userRole: "",
     companyName: "",
     address: "",
     country: "",
@@ -19,9 +20,9 @@ const MyAccount = () => {
     photo: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Fetch data from backend API
+  const fetchLoggedInUser = () => {
     fetch("/api/user/me")
       .then((response) => response.json())
       .then((data) => {
@@ -33,6 +34,10 @@ const MyAccount = () => {
       .catch((error) => {
         console.error("Error fetching user data:", error);
       });
+  };
+  useEffect(() => {
+    // Fetch data from backend API
+    fetchLoggedInUser();
   }, []);
 
   const handleInputChange = (e) => {
@@ -54,25 +59,60 @@ const MyAccount = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
-    });
-
-    // Send data to backend
-    // fetch("/your-backend-endpoint", {
-    //   method: "POST",
-    //   body: data,
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => {
-    //     console.log("Success:", data);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error:", error);
-    //   });
+    setLoading(true);
+    const fName = formData.fName;
+    const lName = formData.lName;
+    const username = formData.username;
+    const phoneNumber = formData.phoneNumber;
+    const companyName = formData.companyName;
+    const address = formData.address;
+    const country = formData.country;
+    const timezone = formData.timezone;
+    const city = formData.city;
+    const stateProvince = formData.stateProvince;
+    const zipPostalCode = formData.zipPostalCode;
+    try {
+      const response = await axios.put("/api/user/update", {
+        fName,
+        lName,
+        username,
+        phoneNumber,
+        companyName,
+        address,
+        country,
+        timezone,
+        city,
+        stateProvince,
+        zipPostalCode,
+      });
+      if (response.data.success) {
+        toast(response.data.message);
+        setFormData({
+          fName: "",
+          lName: "",
+          username: "",
+          phoneNumber: "",
+          companyName: "",
+          address: "",
+          country: "",
+          timezone: "",
+          city: "",
+          stateProvince: "",
+          zipPostalCode: "",
+        });
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+      fetchLoggedInUser();
+    }
   };
 
   return (
@@ -131,13 +171,6 @@ const MyAccount = () => {
                 onChange={handleInputChange}
               />
               <InputField
-                label="Email Address"
-                name="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleInputChange}
-              />
-              <InputField
                 label="Username"
                 name="username"
                 placeholder="Enter your username"
@@ -151,21 +184,6 @@ const MyAccount = () => {
                 value={formData.phoneNumber}
                 onChange={handleInputChange}
               />
-              <div className="w-full flex flex-col gap-2">
-                <label htmlFor="userRole" className="text-sm">
-                  User Role
-                </label>
-                <select
-                  name="userRole"
-                  className="w-full px-2 py-2 border-2 rounded-lg focus:outline-none focus:border-green-300"
-                  id="userRole"
-                  value={formData.userRole}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select Role</option>
-                  <option value="Team Lead">Team Lead</option>
-                </select>
-              </div>
               <InputField
                 label="Company Name"
                 name="companyName"
@@ -241,7 +259,7 @@ const MyAccount = () => {
             type="submit"
             className="mt-8 h-10 w-24 bg-primaryDark text-white rounded"
           >
-            Save
+            {loading ? <Loader /> : "Save"}
           </button>
         </div>
       </form>

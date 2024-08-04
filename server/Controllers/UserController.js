@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { sendEmailVerificationToken } from "../Utils/Middlewares/Verification.js";
 import Team from "../Schemas/TeamSchema.js";
 import { sendInvitationEmail } from "../Utils/InviteFriend/InviteFriendEmail.js";
+import { sendOtpEmail } from "../Utils/PasswordManagement/ManagePassword.js";
 
 // Register a User
 const generateVerficationToken = () => {
@@ -20,7 +21,6 @@ export const registerUser = async (req, res) => {
     email,
     password,
   } = req.body;
-  console.log(email);
   try {
     const userExistByEmail = await User.findOne({ email });
     if (userExistByEmail) {
@@ -220,7 +220,6 @@ export const loggedInUser = async (req, res) => {
         model: "User",
       },
     });
-    console.log(loggedInUser);
     if (!loggedInUser) {
       res.status(402).json({
         success: false,
@@ -469,5 +468,160 @@ export const inviteFriendToWebsite = async (req, res) => {
       success: false,
       message: `Server Error: ${error.message}`,
     });
+  }
+};
+
+// Forgot Password
+
+export const ForgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = generateOtp(); // Assume this is a function that generates a random OTP
+    user.resetPasswordOTP = otp;
+    await user.save();
+
+    const options = {
+      email,
+      otp,
+    };
+
+    await sendOtpEmail(options);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+const generateOtp = () => {
+  return crypto.randomBytes(3).toString("hex").toUpperCase();
+};
+
+// Reset Password
+
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.resetPasswordOTP !== otp) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    user.password = newPassword;
+    user.resetPasswordOTP = undefined; // Clear the OTP
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: `Server Error: ${error.message}`,
+    });
+  }
+};
+
+// My Details
+export const myDetails = async (req, res) => {
+  try {
+    const loggedInUser = await User.findById(req.user);
+    if (!loggedInUser) {
+      res.status(401).json({
+        success: false,
+        message: "Not Logged In",
+      });
+    } else {
+      res.status(200).json({
+        success: true,
+        loggedInUser,
+      });
+    }
+  } catch (error) {
+    res.status(501).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Update My Details
+export const updateMyDetails = async (req, res) => {
+  try {
+    const {
+      fName,
+      lName,
+      username,
+      phoneNumber,
+      companyName,
+      address,
+      country,
+      timezone,
+      city,
+      stateProvince,
+      zipPostalCode,
+    } = req.body;
+    const userId = req.user;
+
+    // Create an update object
+    const updateData = {};
+    if (fName) updateData.fName = fName;
+    if (lName) updateData.lName = lName;
+    if (username) updateData.username = username;
+    if (phoneNumber) updateData.phoneNumber = phoneNumber;
+    if (companyName) updateData.companyName = companyName;
+    if (address) updateData.address = address;
+    if (country) updateData.country = country;
+    if (timezone) updateData.timezone = timezone;
+    if (city) updateData.city = city;
+    if (stateProvince) updateData.stateProvince = stateProvince;
+    if (zipPostalCode) updateData.zipPostalCode = zipPostalCode;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    res.json({
+      success: true,
+      message: "User updated successfully",
+      updatedUser,
+    });
+  } catch (err) {
+    console.error("Error updating user:", err);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

@@ -100,9 +100,7 @@ export const EmailSinglePDFFIle = async (options) => {
   const htmlTemplate = fs.readFileSync(pathToHTMLTemplate, "utf-8");
 
   // Prepare the email content based on the options
-  let htmlContent = htmlTemplate
-    .replace("{{senderName}}", options.sender)
-    .replace("{{loopName}}", options.folderName);
+  let htmlContent = htmlTemplate.replace("{{senderName}}", options.sender);
 
   if (options.linkOnly) {
     const documentLink = `<a href="https://absfhc.com/file/view/receiver/${options.fileId}?sender=${options.senderId}" class="button">VIEW DOCUMENT</a>`;
@@ -112,7 +110,7 @@ export const EmailSinglePDFFIle = async (options) => {
   }
 
   if (options.recevierMember) {
-    htmlContent = htmlContent.replace("{{additionalContent}}", "");
+    htmlContent = htmlContent.replace("{{signUpInvitationSection}}", "");
   } else {
     const signUpInvitationSection = `
       <div style="padding: 20px; background-color: #f5f5f5; margin-top: 20px; text-align: center;">
