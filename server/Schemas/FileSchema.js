@@ -17,7 +17,7 @@ const fileSchema = new mongoose.Schema({
     ref: "folder",
     required: true,
   },
-  uplaodedBy: {
+  uploadedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "user",
     required: true,
