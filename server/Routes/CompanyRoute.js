@@ -10,9 +10,14 @@ import {
   getUserCompanies,
   updateCompanyType,
 } from "../Controllers/CompanyController.js";
+
 const Router = express.Router();
 
-// Create a New Company
+// Route to create a new company
+// - Uses `isAuthenticatedUser` middleware to ensure the user is authenticated
+// - Uses `authorizeVerifiedUser` middleware to ensure the user is verified
+// - Uses `upload.single("companyPic")` middleware to handle file uploads for the company picture
+// - Calls the `createCompany` controller function to handle the request
 Router.post(
   "/company/add/new",
   isAuthenticatedUser,
@@ -20,12 +25,16 @@ Router.post(
   upload.single("companyPic"),
   createCompany
 );
-// Get Companies of a User
 
+// Route to get companies of a user
+// - Uses `isAuthenticatedUser` middleware to ensure the user is authenticated
+// - Calls the `getUserCompanies` controller function to handle the request
 Router.get("/user/companies", isAuthenticatedUser, getUserCompanies);
 
-// Update Company Type
-
+// Route to update the type of a company
+// - Uses `isAuthenticatedUser` middleware to ensure the user is authenticated
+// - Uses `authorizeVerifiedUser` middleware to ensure the user is verified
+// - Calls the `updateCompanyType` controller function to handle the request
 Router.put(
   "/company/type/update/:companyId",
   isAuthenticatedUser,
@@ -33,7 +42,10 @@ Router.put(
   updateCompanyType
 );
 
-// Archive Company
+// Route to archive a company
+// - Uses `isAuthenticatedUser` middleware to ensure the user is authenticated
+// - Uses `authorizeVerifiedUser` middleware to ensure the user is verified
+// - Calls the `archiveCompany` controller function to handle the request
 Router.put(
   "/company/archive/:companyId",
   isAuthenticatedUser,

@@ -3,12 +3,12 @@ import Company from "../Schemas/CompanySchema.js";
 import Team from "../Schemas/TeamSchema.js";
 import User from "../Schemas/UserSchema.js";
 
-// Create a New Company
+// Function to create a new company
 export const createCompany = async (req, res) => {
   try {
     // Destructure company details from the request body
     const { companyName, companyType } = req.body;
-    const companyPic = req.file;
+    const companyPic = req.file; // Assuming file upload for company picture
 
     // Find the admin user based on the user ID present in the request
     const admin = await User.findById(req.user).populate("teams");
@@ -79,18 +79,21 @@ export const createCompany = async (req, res) => {
   }
 };
 
-// Get Comapnies of a User and his Team
-
+// Function to get companies associated with a user and their team
 export const getUserCompanies = async (req, res) => {
   try {
+    // Find companies where the user is listed as an accessor and populate the companyAdmin field
     const companies = await Company.find({ accessors: req.user }).populate(
       "companyAdmin"
     );
+
+    // Respond with the found companies
     res.status(200).json({
       success: true,
       companies,
     });
   } catch (error) {
+    // Catch any errors and send a failure response with the error message
     res.status(501).json({
       success: false,
       message: error.message,
@@ -98,34 +101,31 @@ export const getUserCompanies = async (req, res) => {
   }
 };
 
-// Archive a Company
+// Function to archive or unarchive a company
 export const archiveCompany = async (req, res) => {
   try {
     const { companyId } = req.params;
+
+    // Find the company by its ID
     const company = await Company.findById(companyId);
     if (!company) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: "Company Not Found",
       });
-    } else {
-      if (company.archived) {
-        company.archived = false;
-        await company.save();
-        res.status(200).json({
-          success: true,
-          message: "Unarchived",
-        });
-      } else {
-        company.archived = true;
-        await company.save();
-        res.status(200).json({
-          success: true,
-          message: "Archived",
-        });
-      }
     }
+
+    // Toggle the archived status of the company
+    company.archived = !company.archived;
+    await company.save();
+
+    // Respond with the appropriate message based on the new archived status
+    res.status(200).json({
+      success: true,
+      message: company.archived ? "Archived" : "Unarchived",
+    });
   } catch (error) {
+    // Catch any errors and send a failure response with the error message
     res.status(501).json({
       success: false,
       message: error.message,
@@ -133,28 +133,32 @@ export const archiveCompany = async (req, res) => {
   }
 };
 
-// Change Company Type
-
+// Function to update the company type
 export const updateCompanyType = async (req, res) => {
   try {
     const { companyId } = req.params;
     const { updatedCompanyType } = req.body;
+
+    // Find the company by its ID
     const company = await Company.findById(companyId);
     if (!company) {
-      res.status(401).json({
+      return res.status(401).json({
         success: false,
         message: "Company Not Found",
       });
-    } else {
-      company.companyType = updatedCompanyType;
-      await company.save();
-      console.log(companyId, updatedCompanyType);
-      res.status(200).json({
-        success: true,
-        message: "Company Type Updated",
-      });
     }
+
+    // Update the company type and save the company
+    company.companyType = updatedCompanyType;
+    await company.save();
+
+    // Respond with a success message
+    res.status(200).json({
+      success: true,
+      message: "Company Type Updated",
+    });
   } catch (error) {
+    // Catch any errors and send a failure response with the error message
     res.status(501).json({
       success: false,
       message: error.message,
